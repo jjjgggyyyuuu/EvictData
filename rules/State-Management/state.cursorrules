@@ -1,0 +1,391 @@
+# State Management Rules
+
+## Global State Structure
+
+### Authentication State
+```typescript
+interface AuthState {
+  user: {
+    id: string;
+    email: string;
+    role: 'admin' | 'landlord' | 'tenant';
+    permissions: string[];
+    lastLogin: Date;
+  };
+  isAuthenticated: boolean;
+  accessToken: string;
+  refreshToken: string;
+}
+```
+
+### Property State
+```typescript
+interface PropertyState {
+  properties: Property[];
+  selectedProperty: Property | null;
+  filters: PropertyFilters;
+  sorting: PropertySorting;
+  pagination: {
+    currentPage: number;
+    itemsPerPage: number;
+    totalItems: number;
+  };
+  loading: boolean;
+  error: string | null;
+}
+
+interface Property {
+  id: string;
+  address: string;
+  units: Unit[];
+  landlord: User;
+  status: PropertyStatus;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+### Tenant State
+```typescript
+interface TenantState {
+  tenants: Tenant[];
+  selectedTenant: Tenant | null;
+  filters: TenantFilters;
+  sorting: TenantSorting;
+  pagination: {
+    currentPage: number;
+    itemsPerPage: number;
+    totalItems: number;
+  };
+  loading: boolean;
+  error: string | null;
+}
+
+interface Tenant {
+  id: string;
+  name: string;
+  contact: ContactInfo;
+  leaseInfo: LeaseInfo;
+  paymentHistory: Payment[];
+  evictionHistory: Eviction[];
+  status: TenantStatus;
+}
+```
+
+### Eviction State
+```typescript
+interface EvictionState {
+  evictions: Eviction[];
+  selectedEviction: Eviction | null;
+  filters: EvictionFilters;
+  sorting: EvictionSorting;
+  pagination: {
+    currentPage: number;
+    itemsPerPage: number;
+    totalItems: number;
+  };
+  loading: boolean;
+  error: string | null;
+}
+
+interface Eviction {
+  id: string;
+  tenant: Tenant;
+  property: Property;
+  filingDate: Date;
+  hearingDate: Date | null;
+  judgmentDate: Date | null;
+  judgmentAmount: number | null;
+  status: EvictionStatus;
+  documents: Document[];
+  timeline: TimelineEvent[];
+}
+```
+
+### UI State
+```typescript
+interface UIState {
+  theme: 'light' | 'dark';
+  sidebarOpen: boolean;
+  activeModal: string | null;
+  notifications: Notification[];
+  alerts: Alert[];
+  loading: {
+    [key: string]: boolean;
+  };
+  errors: {
+    [key: string]: string | null;
+  };
+}
+```
+
+## State Management Guidelines
+
+### Redux Store Configuration
+```typescript
+// Store Configuration
+const store = configureStore({
+  reducer: {
+    auth: authReducer,
+    properties: propertyReducer,
+    tenants: tenantReducer,
+    evictions: evictionReducer,
+    ui: uiReducer,
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: ['auth/login/fulfilled', 'auth/refresh/fulfilled'],
+        ignoredPaths: ['auth.user', 'evictions.selectedEviction.timeline'],
+      },
+    }).concat(api.middleware),
+});
+```
+
+### Action Types
+```typescript
+// Authentication Actions
+const AUTH_ACTIONS = {
+  LOGIN: 'auth/login',
+  LOGOUT: 'auth/logout',
+  REFRESH_TOKEN: 'auth/refresh',
+  UPDATE_PROFILE: 'auth/updateProfile',
+};
+
+// Property Actions
+const PROPERTY_ACTIONS = {
+  FETCH_PROPERTIES: 'properties/fetchAll',
+  ADD_PROPERTY: 'properties/add',
+  UPDATE_PROPERTY: 'properties/update',
+  DELETE_PROPERTY: 'properties/delete',
+  SELECT_PROPERTY: 'properties/select',
+};
+
+// Tenant Actions
+const TENANT_ACTIONS = {
+  FETCH_TENANTS: 'tenants/fetchAll',
+  ADD_TENANT: 'tenants/add',
+  UPDATE_TENANT: 'tenants/update',
+  DELETE_TENANT: 'tenants/delete',
+  SELECT_TENANT: 'tenants/select',
+};
+
+// Eviction Actions
+const EVICTION_ACTIONS = {
+  FETCH_EVICTIONS: 'evictions/fetchAll',
+  FILE_EVICTION: 'evictions/file',
+  UPDATE_EVICTION: 'evictions/update',
+  DELETE_EVICTION: 'evictions/delete',
+  SELECT_EVICTION: 'evictions/select',
+};
+```
+
+### Selectors
+```typescript
+// Authentication Selectors
+const selectCurrentUser = (state: RootState) => state.auth.user;
+const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;
+const selectUserPermissions = (state: RootState) => state.auth.user?.permissions;
+
+// Property Selectors
+const selectProperties = (state: RootState) => state.properties.properties;
+const selectSelectedProperty = (state: RootState) => state.properties.selectedProperty;
+const selectPropertyFilters = (state: RootState) => state.properties.filters;
+
+// Tenant Selectors
+const selectTenants = (state: RootState) => state.tenants.tenants;
+const selectSelectedTenant = (state: RootState) => state.tenants.selectedTenant;
+const selectTenantFilters = (state: RootState) => state.tenants.filters;
+
+// Eviction Selectors
+const selectEvictions = (state: RootState) => state.evictions.evictions;
+const selectSelectedEviction = (state: RootState) => state.evictions.selectedEviction;
+const selectEvictionFilters = (state: RootState) => state.evictions.filters;
+```
+
+### Thunks
+```typescript
+// Authentication Thunks
+const loginThunk = createAsyncThunk(
+  AUTH_ACTIONS.LOGIN,
+  async (credentials: LoginCredentials) => {
+    const response = await authApi.login(credentials);
+    return response.data;
+  }
+);
+
+// Property Thunks
+const fetchPropertiesThunk = createAsyncThunk(
+  PROPERTY_ACTIONS.FETCH_PROPERTIES,
+  async (filters: PropertyFilters) => {
+    const response = await propertyApi.fetchAll(filters);
+    return response.data;
+  }
+);
+
+// Tenant Thunks
+const fetchTenantsThunk = createAsyncThunk(
+  TENANT_ACTIONS.FETCH_TENANTS,
+  async (filters: TenantFilters) => {
+    const response = await tenantApi.fetchAll(filters);
+    return response.data;
+  }
+);
+
+// Eviction Thunks
+const fetchEvictionsThunk = createAsyncThunk(
+  EVICTION_ACTIONS.FETCH_EVICTIONS,
+  async (filters: EvictionFilters) => {
+    const response = await evictionApi.fetchAll(filters);
+    return response.data;
+  }
+);
+```
+
+### Error Handling
+```typescript
+// Error Action Creator
+const setError = (error: string) => ({
+  type: 'SET_ERROR',
+  payload: error,
+});
+
+// Error Middleware
+const errorMiddleware = (store) => (next) => (action) => {
+  if (action.type.endsWith('/rejected')) {
+    store.dispatch(setError(action.error.message));
+  }
+  return next(action);
+};
+```
+
+### Loading States
+```typescript
+// Loading Selectors
+const selectIsLoading = (state: RootState, key: string) => state.ui.loading[key];
+const selectError = (state: RootState, key: string) => state.ui.errors[key];
+
+// Loading Reducer
+const loadingReducer = (state, action) => {
+  if (action.type.endsWith('/pending')) {
+    return {
+      ...state,
+      loading: {
+        ...state.loading,
+        [action.type.split('/')[0]]: true,
+      },
+    };
+  }
+  if (action.type.endsWith('/fulfilled') || action.type.endsWith('/rejected')) {
+    return {
+      ...state,
+      loading: {
+        ...state.loading,
+        [action.type.split('/')[0]]: false,
+      },
+    };
+  }
+  return state;
+};
+```
+
+### Persistence
+```typescript
+// Storage Configuration
+const persistConfig = {
+  key: 'root',
+  storage,
+  whitelist: ['auth', 'ui'],
+};
+
+// Persist Reducer
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+// Store with Persistence
+const store = configureStore({
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }),
+});
+```
+
+### Performance Optimization
+```typescript
+// Memoized Selectors
+const selectFilteredEvictions = createSelector(
+  [selectEvictions, selectEvictionFilters],
+  (evictions, filters) => {
+    return evictions.filter(eviction => {
+      // Apply filters
+      return true;
+    });
+  }
+);
+
+// Batch Actions
+const batchUpdateEvictions = (evictions: Eviction[]) => ({
+  type: 'BATCH_UPDATE_EVICTIONS',
+  payload: evictions,
+});
+```
+
+### Real-time Updates
+```typescript
+// WebSocket Middleware
+const websocketMiddleware = (store) => {
+  let socket;
+
+  return (next) => (action) => {
+    if (action.type === 'WS_CONNECT') {
+      socket = new WebSocket(action.payload.url);
+      
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        store.dispatch({
+          type: 'WS_MESSAGE',
+          payload: data,
+        });
+      };
+    }
+    
+    return next(action);
+  };
+};
+```
+
+### Form State Management
+```typescript
+// Form Actions
+const FORM_ACTIONS = {
+  UPDATE_FIELD: 'form/updateField',
+  RESET_FORM: 'form/reset',
+  SET_ERRORS: 'form/setErrors',
+  SUBMIT_FORM: 'form/submit',
+};
+
+// Form Reducer
+const formReducer = (state, action) => {
+  switch (action.type) {
+    case FORM_ACTIONS.UPDATE_FIELD:
+      return {
+        ...state,
+        values: {
+          ...state.values,
+          [action.payload.field]: action.payload.value,
+        },
+      };
+    case FORM_ACTIONS.RESET_FORM:
+      return {
+        ...state,
+        values: {},
+        errors: {},
+      };
+    default:
+      return state;
+  }
+};
+``` 

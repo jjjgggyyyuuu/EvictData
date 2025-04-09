@@ -1,0 +1,117 @@
+# React Frontend Rules
+
+## Project Structure
+```
+src/
+  ├── components/         # Reusable components
+  ├── pages/             # Page components
+  ├── hooks/             # Custom hooks
+  ├── services/          # API services
+  ├── utils/             # Helper functions
+  ├── context/           # React context
+  ├── styles/            # Global styles
+  └── types/             # TypeScript types
+```
+
+## Component Guidelines
+- Use functional components with hooks
+- Implement proper prop types
+- Keep components focused and reusable
+- Follow container/presentation pattern
+
+## State Management
+- Use React Context for global state
+- Implement Redux for complex state
+- Keep state close to where it's used
+- Use proper state initialization
+
+## Styling
+- Use Tailwind CSS for styling
+- Follow mobile-first approach
+- Maintain consistent color scheme
+- Use CSS modules for components
+
+## Forms
+- Implement form validation
+- Use controlled components
+- Handle loading states
+- Show clear error messages
+
+## Navigation
+- Use React Router
+- Implement protected routes
+- Handle 404 pages
+- Maintain breadcrumbs
+
+## Data Fetching
+- Use React Query for API calls
+- Implement proper error handling
+- Show loading states
+- Cache responses appropriately
+
+## Performance
+- Lazy load components
+- Optimize images
+- Minimize bundle size
+- Use proper memoization
+
+## Testing
+- Write unit tests
+- Implement integration tests
+- Use React Testing Library
+- Maintain good test coverage
+
+## Accessibility
+- Follow WCAG guidelines
+- Use semantic HTML
+- Implement keyboard navigation
+- Add proper ARIA labels
+
+## Error Handling
+- Implement error boundaries
+- Show user-friendly errors
+- Log errors properly
+- Handle offline states
+
+## Code Style
+- Use ESLint
+- Follow Prettier config
+- Maintain consistent naming
+- Write clear comments
+
+## Security
+- Sanitize user input
+- Prevent XSS attacks
+- Handle sensitive data
+- Implement CSP
+
+## Features
+### Dashboard
+- Show property overview
+- Display eviction statistics
+- List recent activities
+- Show important alerts
+
+### Property Management
+- List all properties
+- Add/edit properties
+- Show property details
+- Track maintenance
+
+### Tenant Management
+- List all tenants
+- Add/edit tenants
+- Show payment history
+- Track communications
+
+### Eviction Cases
+- List all cases
+- Create new cases
+- Track case progress
+- Generate reports
+
+### Reports
+- Generate PDF reports
+- Export data to CSV
+- Show data visualizations
+- Filter and sort data 

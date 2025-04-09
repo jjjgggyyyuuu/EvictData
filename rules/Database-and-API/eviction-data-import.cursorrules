@@ -1,0 +1,60 @@
+# Eviction Data Import Rules
+
+## CSV Import Guidelines
+- Use pandas for CSV file processing
+- Handle date formats consistently (MM/DD/YYYY)
+- Process imports in batches of 100 records
+- Log all import operations
+- Validate data before import
+
+## Data Cleaning Rules
+- Remove leading/trailing whitespace from text fields
+- Standardize county names
+- Parse case numbers consistently
+- Extract plaintiff and defendant names from case descriptions
+- Handle missing values appropriately
+
+## Security Guidelines
+- Never store raw passwords or sensitive data
+- Anonymize tenant information where possible
+- Keep audit trail of all data imports
+- Validate file permissions before processing
+
+## Database Operations
+- Use SQLAlchemy for all database operations
+- Implement proper error handling and rollbacks
+- Maintain data integrity constraints
+- Use batch processing for large imports
+
+## Code Structure
+```python
+# Standard import pattern
+import pandas as pd
+from datetime import datetime
+from models import db, EvictionRecord
+
+def import_eviction_data(csv_path):
+    """Import eviction data from CSV file"""
+    # Validation
+    validate_file(csv_path)
+    
+    # Data processing
+    df = pd.read_csv(csv_path)
+    clean_data(df)
+    
+    # Batch import
+    with db.session.begin():
+        process_in_batches(df)
+```
+
+## Error Handling
+- Log all errors with stack traces
+- Implement retry logic for failed imports
+- Maintain transaction integrity
+- Provide detailed error messages
+
+## Reporting
+- Generate import summary reports
+- Track success/failure rates
+- Monitor data quality metrics
+- Report any anomalies 

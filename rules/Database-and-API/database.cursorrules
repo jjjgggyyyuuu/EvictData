@@ -1,0 +1,439 @@
+# Database and API Rules
+
+## Database Schema
+
+### Users Table
+```sql
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  role VARCHAR(50) NOT NULL CHECK (role IN ('admin', 'landlord', 'tenant')),
+  first_name VARCHAR(100),
+  last_name VARCHAR(100),
+  phone VARCHAR(20),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  last_login TIMESTAMP WITH TIME ZONE,
+  is_active BOOLEAN DEFAULT true,
+  reset_token VARCHAR(255),
+  reset_token_expires TIMESTAMP WITH TIME ZONE
+);
+
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_role ON users(role);
+```
+
+### Properties Table
+```sql
+CREATE TABLE properties (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  landlord_id UUID REFERENCES users(id),
+  address_line1 VARCHAR(255) NOT NULL,
+  address_line2 VARCHAR(255),
+  city VARCHAR(100) NOT NULL,
+  state VARCHAR(50) NOT NULL,
+  zip_code VARCHAR(20) NOT NULL,
+  property_type VARCHAR(50) NOT NULL,
+  total_units INTEGER NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  status VARCHAR(50) DEFAULT 'active',
+  is_deleted BOOLEAN DEFAULT false
+);
+
+CREATE INDEX idx_properties_landlord ON properties(landlord_id);
+CREATE INDEX idx_properties_status ON properties(status);
+```
+
+### Units Table
+```sql
+CREATE TABLE units (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  property_id UUID REFERENCES properties(id),
+  unit_number VARCHAR(50) NOT NULL,
+  floor_plan VARCHAR(100),
+  square_feet INTEGER,
+  bedrooms INTEGER,
+  bathrooms DECIMAL(3,1),
+  monthly_rent DECIMAL(10,2),
+  status VARCHAR(50) DEFAULT 'vacant',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_units_property ON units(property_id);
+CREATE INDEX idx_units_status ON units(status);
+```
+
+### Leases Table
+```sql
+CREATE TABLE leases (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  unit_id UUID REFERENCES units(id),
+  tenant_id UUID REFERENCES users(id),
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  monthly_rent DECIMAL(10,2) NOT NULL,
+  security_deposit DECIMAL(10,2),
+  lease_type VARCHAR(50) NOT NULL,
+  status VARCHAR(50) DEFAULT 'active',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  terminated_at TIMESTAMP WITH TIME ZONE,
+  termination_reason TEXT
+);
+
+CREATE INDEX idx_leases_unit ON leases(unit_id);
+CREATE INDEX idx_leases_tenant ON leases(tenant_id);
+CREATE INDEX idx_leases_status ON leases(status);
+```
+
+### Evictions Table
+```sql
+CREATE TABLE evictions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  lease_id UUID REFERENCES leases(id),
+  filing_date DATE NOT NULL,
+  filing_reason TEXT NOT NULL,
+  court_date DATE,
+  judgment_date DATE,
+  judgment_amount DECIMAL(10,2),
+  writ_date DATE,
+  status VARCHAR(50) NOT NULL,
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_evictions_lease ON evictions(lease_id);
+CREATE INDEX idx_evictions_status ON evictions(status);
+CREATE INDEX idx_evictions_filing_date ON evictions(filing_date);
+```
+
+### Documents Table
+```sql
+CREATE TABLE documents (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  eviction_id UUID REFERENCES evictions(id),
+  document_type VARCHAR(100) NOT NULL,
+  file_name VARCHAR(255) NOT NULL,
+  file_path VARCHAR(1000) NOT NULL,
+  uploaded_by UUID REFERENCES users(id),
+  upload_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  is_deleted BOOLEAN DEFAULT false
+);
+
+CREATE INDEX idx_documents_eviction ON documents(eviction_id);
+CREATE INDEX idx_documents_type ON documents(document_type);
+```
+
+## API Endpoints
+
+### Authentication Endpoints
+```typescript
+/**
+ * @route POST /api/auth/login
+ * @desc Authenticate user and get token
+ * @access Public
+ */
+interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+interface LoginResponse {
+  token: string;
+  user: {
+    id: string;
+    email: string;
+    role: string;
+  };
+}
+
+/**
+ * @route POST /api/auth/register
+ * @desc Register a new user
+ * @access Public
+ */
+interface RegisterRequest {
+  email: string;
+  password: string;
+  role: 'landlord' | 'tenant';
+  firstName: string;
+  lastName: string;
+  phone?: string;
+}
+
+/**
+ * @route POST /api/auth/forgot-password
+ * @desc Send password reset email
+ * @access Public
+ */
+interface ForgotPasswordRequest {
+  email: string;
+}
+```
+
+### Property Endpoints
+```typescript
+/**
+ * @route GET /api/properties
+ * @desc Get all properties (filtered by landlord if not admin)
+ * @access Private
+ */
+interface GetPropertiesResponse {
+  properties: Property[];
+  total: number;
+  page: number;
+  perPage: number;
+}
+
+/**
+ * @route POST /api/properties
+ * @desc Create a new property
+ * @access Private (Landlord/Admin)
+ */
+interface CreatePropertyRequest {
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  propertyType: string;
+  totalUnits: number;
+}
+
+/**
+ * @route GET /api/properties/:id/units
+ * @desc Get all units for a property
+ * @access Private
+ */
+interface GetUnitsResponse {
+  units: Unit[];
+  total: number;
+}
+```
+
+### Eviction Endpoints
+```typescript
+/**
+ * @route POST /api/evictions
+ * @desc File a new eviction
+ * @access Private (Landlord/Admin)
+ */
+interface FileEvictionRequest {
+  leaseId: string;
+  filingReason: string;
+  filingDate: string;
+  courtDate?: string;
+  notes?: string;
+}
+
+/**
+ * @route GET /api/evictions
+ * @desc Get all evictions (filtered by role)
+ * @access Private
+ */
+interface GetEvictionsResponse {
+  evictions: Eviction[];
+  total: number;
+  page: number;
+  perPage: number;
+}
+
+/**
+ * @route PATCH /api/evictions/:id
+ * @desc Update eviction status and details
+ * @access Private (Landlord/Admin)
+ */
+interface UpdateEvictionRequest {
+  status?: string;
+  courtDate?: string;
+  judgmentDate?: string;
+  judgmentAmount?: number;
+  writDate?: string;
+  notes?: string;
+}
+```
+
+### Document Endpoints
+```typescript
+/**
+ * @route POST /api/documents/upload
+ * @desc Upload eviction-related documents
+ * @access Private (Landlord/Admin)
+ */
+interface UploadDocumentRequest {
+  evictionId: string;
+  documentType: string;
+  file: File;
+}
+
+/**
+ * @route GET /api/documents/:id
+ * @desc Download a document
+ * @access Private
+ */
+interface GetDocumentResponse {
+  fileName: string;
+  fileType: string;
+  data: Blob;
+}
+```
+
+## Database Access Patterns
+
+### Query Optimization
+```sql
+-- Efficient query for eviction dashboard
+SELECT 
+  e.id,
+  e.filing_date,
+  e.status,
+  p.address_line1,
+  p.city,
+  p.state,
+  u.unit_number,
+  tenant.first_name || ' ' || tenant.last_name as tenant_name
+FROM evictions e
+JOIN leases l ON e.lease_id = l.id
+JOIN units u ON l.unit_id = u.id
+JOIN properties p ON u.property_id = p.id
+JOIN users tenant ON l.tenant_id = tenant.id
+WHERE e.filing_date >= $1
+  AND e.filing_date <= $2
+  AND ($3::uuid IS NULL OR p.landlord_id = $3)
+ORDER BY e.filing_date DESC;
+
+-- Index for the above query
+CREATE INDEX idx_evictions_composite 
+ON evictions(filing_date, status);
+```
+
+### Data Access Patterns
+```typescript
+// Common data access patterns
+interface DataAccessPatterns {
+  // Get all active evictions for a landlord
+  getActiveEvictions(landlordId: string): Promise<Eviction[]>;
+  
+  // Get eviction timeline with related documents
+  getEvictionTimeline(evictionId: string): Promise<TimelineEvent[]>;
+  
+  // Get property occupancy statistics
+  getPropertyStats(propertyId: string): Promise<PropertyStats>;
+  
+  // Search tenants with eviction history
+  searchTenantsWithHistory(searchTerm: string): Promise<TenantHistory[]>;
+}
+```
+
+### Security Rules
+```typescript
+// Database security rules
+const securityRules = {
+  // Role-based access control
+  roles: {
+    admin: ['*'],
+    landlord: [
+      'read:properties',
+      'write:properties',
+      'read:units',
+      'write:units',
+      'read:leases',
+      'write:leases',
+      'read:evictions',
+      'write:evictions',
+      'read:documents',
+      'write:documents'
+    ],
+    tenant: [
+      'read:leases',
+      'read:evictions',
+      'read:documents'
+    ]
+  },
+  
+  // Data validation rules
+  validation: {
+    evictions: {
+      create: (data: any, context: any) => {
+        return (
+          context.auth.role === 'admin' ||
+          (context.auth.role === 'landlord' &&
+            isPropertyOwner(data.propertyId, context.auth.uid))
+        );
+      }
+    }
+  }
+};
+```
+
+### Error Handling
+```typescript
+// Database error handling
+interface DatabaseError extends Error {
+  code: string;
+  table?: string;
+  constraint?: string;
+}
+
+const handleDatabaseError = (error: DatabaseError) => {
+  switch (error.code) {
+    case '23505': // unique_violation
+      return new ConflictError('Resource already exists');
+    case '23503': // foreign_key_violation
+      return new BadRequestError('Invalid reference');
+    case '23514': // check_violation
+      return new BadRequestError('Invalid data');
+    default:
+      return new InternalServerError('Database error');
+  }
+};
+```
+
+### Migrations
+```sql
+-- Migration: Add support for payment tracking
+CREATE TABLE payments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  eviction_id UUID REFERENCES evictions(id),
+  amount DECIMAL(10,2) NOT NULL,
+  payment_date DATE NOT NULL,
+  payment_type VARCHAR(50) NOT NULL,
+  status VARCHAR(50) DEFAULT 'pending',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Migration: Add audit logging
+CREATE TABLE audit_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id),
+  action VARCHAR(50) NOT NULL,
+  table_name VARCHAR(50) NOT NULL,
+  record_id UUID NOT NULL,
+  changes JSONB,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### Backup and Recovery
+```typescript
+// Backup configuration
+interface BackupConfig {
+  schedule: 'daily' | 'weekly' | 'monthly';
+  retention: number; // days
+  type: 'full' | 'incremental';
+  encryption: boolean;
+  location: string;
+}
+
+// Recovery procedures
+interface RecoveryProcedures {
+  pointInTimeRecovery(timestamp: Date): Promise<void>;
+  fullRestore(backupFile: string): Promise<void>;
+  validateBackup(backupId: string): Promise<ValidationResult>;
+}
+``` 

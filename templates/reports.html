@@ -1,0 +1,384 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
+        <h1>Reports</h1>
+        <div>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#generateReportModal">
+                <i class="fas fa-plus me-2"></i>Generate New Report
+            </button>
+        </div>
+    </div>
+    
+    <!-- Reports List -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Available Reports</h5>
+        </div>
+        <div class="card-body">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            {% if reports %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Report Name</th>
+                                <th>Date Generated</th>
+                                <th>Records</th>
+                                <th>Type</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for report in reports %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('view_report', filename=report.filename) }}">
+                                        {{ report.filename }}
+                                    </a>
+                                </td>
+                                <td>{{ report.timestamp }}</td>
+                                <td>{{ report.records }}</td>
+                                <td>
+                                    {% if report.filename.endswith('.json') %}
+                                    <span class="badge bg-info">JSON</span>
+                                    {% elif report.filename.endswith('.md') %}
+                                    <span class="badge bg-success">Markdown</span>
+                                    {% elif report.filename.endswith('.pdf') %}
+                                    <span class="badge bg-danger">PDF</span>
+                                    {% elif report.filename.endswith('.csv') %}
+                                    <span class="badge bg-warning text-dark">CSV</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Other</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="{{ url_for('view_report', filename=report.filename) }}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <span class="visually-hidden">Toggle Dropdown</span>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="{{ url_for('view_report', filename=report.filename) }}">View</a></li>
+                                            <li><a class="dropdown-item" href="#">Download</a></li>
+                                            <li><a class="dropdown-item" href="#">Email</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item text-danger" href="#">Delete</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <p>No reports have been generated yet. Click the button above to create your first report.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Report Types Cards -->
+    <h2 class="mb-3"><i class="fas fa-chart-pie me-2"></i>Report Types</h2>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 hover-effect">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Eviction Status Report</h5>
+                </div>
+                <div class="card-body">
+                    <p>Generate a report of all eviction cases with their current status and timeline. Filter by status, date range, and property.</p>
+                    <ul>
+                        <li>Status summary with counts</li>
+                        <li>Timeline progression</li>
+                        <li>Judgment amounts summary</li>
+                        <li>Filterable by status and date</li>
+                    </ul>
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-outline-primary mt-auto" data-bs-toggle="modal" data-bs-target="#generateReportModal" data-report-type="eviction-status">
+                            Generate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 hover-effect">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-dollar-sign me-2"></i>Financial Summary Report</h5>
+                </div>
+                <div class="card-body">
+                    <p>Generate a financial summary of all eviction cases, including judgment amounts, payments, and outstanding balances.</p>
+                    <ul>
+                        <li>Total judgment amounts</li>
+                        <li>Payment collections</li>
+                        <li>Outstanding balances</li>
+                        <li>Financial metrics and trends</li>
+                    </ul>
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-outline-success mt-auto" data-bs-toggle="modal" data-bs-target="#generateReportModal" data-report-type="financial">
+                            Generate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 hover-effect">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Timeline Analysis Report</h5>
+                </div>
+                <div class="card-body">
+                    <p>Analyze eviction timelines to understand process duration, bottlenecks, and opportunities for improvement.</p>
+                    <ul>
+                        <li>Average time between steps</li>
+                        <li>Comparison to benchmarks</li>
+                        <li>Process bottlenecks</li>
+                        <li>Timeline trends over time</li>
+                    </ul>
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-outline-info mt-auto" data-bs-toggle="modal" data-bs-target="#generateReportModal" data-report-type="timeline">
+                            Generate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 hover-effect">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-building me-2"></i>Property Analysis Report</h5>
+                </div>
+                <div class="card-body">
+                    <p>Analyze eviction patterns by property to identify trends and problem areas.</p>
+                    <ul>
+                        <li>Evictions by property</li>
+                        <li>Repeat tenant issues</li>
+                        <li>Property performance metrics</li>
+                        <li>Geographic distribution</li>
+                    </ul>
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-outline-warning mt-auto" data-bs-toggle="modal" data-bs-target="#generateReportModal" data-report-type="property">
+                            Generate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 hover-effect">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Urgent Action Report</h5>
+                </div>
+                <div class="card-body">
+                    <p>Identify cases requiring immediate attention based on status, timeline, or other critical factors.</p>
+                    <ul>
+                        <li>Cases with impending deadlines</li>
+                        <li>Stalled cases</li>
+                        <li>High-value judgments</li>
+                        <li>Priority action items</li>
+                    </ul>
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-outline-danger mt-auto" data-bs-toggle="modal" data-bs-target="#generateReportModal" data-report-type="urgent">
+                            Generate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 hover-effect">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Custom Report</h5>
+                </div>
+                <div class="card-body">
+                    <p>Create a customized report with specific fields, filters, and formatting options.</p>
+                    <ul>
+                        <li>Select specific data fields</li>
+                        <li>Apply complex filters</li>
+                        <li>Choose output format</li>
+                        <li>Save report templates</li>
+                    </ul>
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-outline-secondary mt-auto" data-bs-toggle="modal" data-bs-target="#generateReportModal" data-report-type="custom">
+                            Generate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Generate Report Modal -->
+    <div class="modal fade" id="generateReportModal" tabindex="-1" aria-labelledby="generateReportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="generateReportModalLabel">Generate Report</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ url_for('generate_eviction_report') }}" method="post">
+                        <input type="hidden" id="report_type" name="report_type" value="eviction-status">
+                        
+                        <div class="mb-3">
+                            <label for="report_title" class="form-label">Report Title</label>
+                            <input type="text" class="form-control" id="report_title" name="report_title" placeholder="Enter a title for this report">
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="status" class="form-label">Status Filter</label>
+                                <select class="form-select" id="status" name="status">
+                                    <option value="">All Statuses</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="active">Active</option>
+                                    <option value="judgment">Judgment</option>
+                                    <option value="writ">Writ Issued</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="landlord" class="form-label">Landlord</label>
+                                <select class="form-select" id="landlord" name="landlord">
+                                    <option value="">All Landlords</option>
+                                    <option value="evernest">Evernest Holdings, LLC</option>
+                                    <option value="sfr">SFR Acquisitions</option>
+                                    <option value="amli">AMLI Residential</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="date_from" class="form-label">Date From</label>
+                                <input type="date" class="form-control" id="date_from" name="date_from">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="date_to" class="form-label">Date To</label>
+                                <input type="date" class="form-control" id="date_to" name="date_to">
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="format" class="form-label">Report Format</label>
+                                <select class="form-select" id="format" name="format">
+                                    <option value="markdown">Markdown</option>
+                                    <option value="json">JSON</option>
+                                    <option value="pdf">PDF</option>
+                                    <option value="csv">CSV</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="sort_by" class="form-label">Sort By</label>
+                                <select class="form-select" id="sort_by" name="sort_by">
+                                    <option value="filing_date">Filing Date</option>
+                                    <option value="judgment_date">Judgment Date</option>
+                                    <option value="eviction_date">Eviction Date</option>
+                                    <option value="judgment_amount">Judgment Amount</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Include Sections</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="include_summary" name="include_summary" checked>
+                                <label class="form-check-label" for="include_summary">Summary Statistics</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="include_case_details" name="include_case_details" checked>
+                                <label class="form-check-label" for="include_case_details">Case Details</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="include_tenant_info" name="include_tenant_info" checked>
+                                <label class="form-check-label" for="include_tenant_info">Tenant Information</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="include_financials" name="include_financials" checked>
+                                <label class="form-check-label" for="include_financials">Financial Information</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="include_timeline" name="include_timeline" checked>
+                                <label class="form-check-label" for="include_timeline">Timeline Visualization</label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Generate Report</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Update modal based on report type
+        var reportButtons = document.querySelectorAll('[data-report-type]');
+        reportButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                var reportType = this.getAttribute('data-report-type');
+                document.getElementById('report_type').value = reportType;
+                
+                // Update modal title based on report type
+                var modalTitle = 'Generate ';
+                switch(reportType) {
+                    case 'eviction-status':
+                        modalTitle += 'Eviction Status Report';
+                        document.getElementById('report_title').value = 'Eviction Status Report - ' + new Date().toISOString().slice(0, 10);
+                        break;
+                    case 'financial':
+                        modalTitle += 'Financial Summary Report';
+                        document.getElementById('report_title').value = 'Financial Summary Report - ' + new Date().toISOString().slice(0, 10);
+                        break;
+                    case 'timeline':
+                        modalTitle += 'Timeline Analysis Report';
+                        document.getElementById('report_title').value = 'Timeline Analysis Report - ' + new Date().toISOString().slice(0, 10);
+                        break;
+                    case 'property':
+                        modalTitle += 'Property Analysis Report';
+                        document.getElementById('report_title').value = 'Property Analysis Report - ' + new Date().toISOString().slice(0, 10);
+                        break;
+                    case 'urgent':
+                        modalTitle += 'Urgent Action Report';
+                        document.getElementById('report_title').value = 'Urgent Action Report - ' + new Date().toISOString().slice(0, 10);
+                        break;
+                    case 'custom':
+                        modalTitle += 'Custom Report';
+                        document.getElementById('report_title').value = 'Custom Report - ' + new Date().toISOString().slice(0, 10);
+                        break;
+                }
+                document.getElementById('generateReportModalLabel').textContent = modalTitle;
+            });
+        });
+    });
+</script>
+{% endblock %} 

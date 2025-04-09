@@ -1,0 +1,285 @@
+# Frontend Development Rules
+
+## Project Structure
+```
+src/
+├── components/
+│   ├── common/
+│   │   ├── Button.tsx
+│   │   ├── Input.tsx
+│   │   ├── Modal.tsx
+│   │   ├── Table.tsx
+│   │   └── Form.tsx
+│   ├── layout/
+│   │   ├── Header.tsx
+│   │   ├── Sidebar.tsx
+│   │   └── Footer.tsx
+│   ├── properties/
+│   │   ├── PropertyList.tsx
+│   │   ├── PropertyDetails.tsx
+│   │   └── PropertyForm.tsx
+│   ├── tenants/
+│   │   ├── TenantList.tsx
+│   │   ├── TenantDetails.tsx
+│   │   └── TenantForm.tsx
+│   ├── evictions/
+│   │   ├── EvictionList.tsx
+│   │   ├── EvictionDetails.tsx
+│   │   ├── EvictionForm.tsx
+│   │   └── EvictionTimeline.tsx
+│   └── reports/
+│       ├── EvictionReport.tsx
+│       ├── PaymentReport.tsx
+│       └── OccupancyReport.tsx
+├── pages/
+│   ├── Dashboard.tsx
+│   ├── Properties.tsx
+│   ├── Tenants.tsx
+│   ├── Evictions.tsx
+│   └── Reports.tsx
+├── hooks/
+│   ├── useAuth.ts
+│   ├── useProperties.ts
+│   ├── useTenants.ts
+│   └── useEvictions.ts
+├── services/
+│   ├── api.ts
+│   ├── auth.ts
+│   └── storage.ts
+├── utils/
+│   ├── dates.ts
+│   ├── currency.ts
+│   └── validation.ts
+└── styles/
+    ├── global.css
+    └── theme.ts
+```
+
+## Component Guidelines
+
+### Common Components
+- Use TypeScript for all components
+- Implement responsive design
+- Follow accessibility standards
+- Include proper error handling
+- Add loading states
+- Use proper prop types
+
+### Forms
+- Implement form validation
+- Show validation errors
+- Include success messages
+- Handle API errors
+- Add loading states
+- Use controlled components
+
+### Tables
+- Implement sorting
+- Add filtering
+- Include pagination
+- Show loading states
+- Handle empty states
+- Allow bulk actions
+
+## State Management
+- Use React Query for server state
+- Implement proper caching
+- Handle loading states
+- Manage error states
+- Update optimistically
+- Sync with backend
+
+## Styling
+- Use Tailwind CSS
+- Follow design system
+- Maintain consistency
+- Support dark mode
+- Handle responsiveness
+- Use CSS modules
+
+## Authentication
+- Implement JWT auth
+- Handle token refresh
+- Manage user sessions
+- Add role-based access
+- Secure routes
+- Handle expired tokens
+
+## Performance
+- Implement code splitting
+- Use lazy loading
+- Optimize images
+- Cache API responses
+- Minimize bundle size
+- Monitor performance
+
+## Error Handling
+- Show error messages
+- Log errors
+- Retry failed requests
+- Handle offline state
+- Provide fallbacks
+- Monitor errors
+
+## Testing
+- Write unit tests
+- Add integration tests
+- Test components
+- Mock API calls
+- Test error states
+- Maintain coverage
+
+## Documentation
+- Document components
+- Add code comments
+- Update README
+- Include examples
+- Document APIs
+- Keep docs current
+
+## Development
+- Use ESLint
+- Implement Prettier
+- Follow Git flow
+- Review code
+- Use TypeScript
+- Monitor quality
+
+## Deployment
+- Build optimization
+- Environment config
+- CI/CD pipeline
+- Version control
+- Monitoring
+- Analytics
+
+## Features
+
+### Dashboard
+- Show key metrics
+- Display charts
+- List recent activity
+- Show alerts
+- Quick actions
+- Status overview
+
+### Property Management
+- List properties
+- Property details
+- Add/edit properties
+- Upload photos
+- Manage units
+- Track occupancy
+
+### Tenant Management
+- List tenants
+- Tenant profiles
+- Add/edit tenants
+- Document upload
+- Payment history
+- Communication log
+
+### Eviction Management
+- List evictions
+- Eviction details
+- File evictions
+- Track timeline
+- Generate docs
+- Court dates
+
+### Reporting
+- Generate reports
+- Export data
+- Custom filters
+- Save templates
+- Schedule reports
+- Share reports
+
+## UI/UX Guidelines
+
+### Colors
+```css
+:root {
+  --primary: #2563eb;
+  --secondary: #475569;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+  --light: #f8fafc;
+  --dark: #1e293b;
+}
+```
+
+### Typography
+```css
+:root {
+  --font-sans: 'Inter', system-ui;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-size-base: 16px;
+  --line-height-base: 1.5;
+}
+```
+
+### Spacing
+```css
+:root {
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+}
+```
+
+### Breakpoints
+```css
+:root {
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+}
+```
+
+### Shadows
+```css
+:root {
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+```
+
+### Animations
+```css
+:root {
+  --transition-base: all 0.2s ease-in-out;
+  --transition-slow: all 0.3s ease-in-out;
+  --transition-fast: all 0.1s ease-in-out;
+}
+```
+
+## Accessibility
+- ARIA labels
+- Keyboard navigation
+- Screen readers
+- Color contrast
+- Focus states
+- Alt text
+
+## SEO
+- Meta tags
+- Structured data
+- Sitemap
+- Robots.txt
+- Analytics
+- Performance
+
+## Security
+- Input validation
+- XSS prevention
+- CSRF protection
+- Content security
+- Secure storage
+- Data encryption 

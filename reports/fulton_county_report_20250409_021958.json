@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-04-09 02:19:58",
+  "title": "Fulton County Eviction Report",
+  "eviction_count": 0,
+  "evictions": [],
+  "writ_timeline": {
+    "filing_date": "2025-03-12",
+    "service_date": "2025-03-17",
+    "court_date": "2025-03-31",
+    "judgment_date": "2025-04-02",
+    "writ_date": "2025-04-09",
+    "eviction_date": "2025-04-16",
+    "days_to_eviction": 6
+  }
+}

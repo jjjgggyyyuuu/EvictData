@@ -1,0 +1,1007 @@
+// Eviction Management System Flask Routes Rules
+// These rules define the structure and conventions for Flask routes
+
+// Route Structure
+/**
+ * Flask routes should be organized using Blueprints:
+ * - auth_bp: Authentication routes
+ * - dashboard_bp: Dashboard and overview routes
+ * - property_bp: Property management routes
+ * - tenant_bp: Tenant management routes
+ * - lease_bp: Lease management routes
+ * - eviction_bp: Eviction case management routes
+ * - document_bp: Document management routes
+ * - payment_bp: Payment management routes
+ * - report_bp: Reporting and analytics routes
+ * - api_bp: API routes (if not using a separate API)
+ * - admin_bp: Administrative functions
+ * 
+ * Example Blueprint Registration:
+ * ```python
+ * from flask import Flask
+ * from .routes.auth import auth_bp
+ * from .routes.dashboard import dashboard_bp
+ * from .routes.properties import property_bp
+ * from .routes.tenants import tenant_bp
+ * from .routes.leases import lease_bp
+ * from .routes.evictions import eviction_bp
+ * from .routes.documents import document_bp
+ * from .routes.payments import payment_bp
+ * from .routes.reports import report_bp
+ * from .routes.api import api_bp
+ * from .routes.admin import admin_bp
+ * 
+ * app = Flask(__name__)
+ * 
+ * # Register blueprints
+ * app.register_blueprint(auth_bp)
+ * app.register_blueprint(dashboard_bp)
+ * app.register_blueprint(property_bp, url_prefix='/properties')
+ * app.register_blueprint(tenant_bp, url_prefix='/tenants')
+ * app.register_blueprint(lease_bp, url_prefix='/leases')
+ * app.register_blueprint(eviction_bp, url_prefix='/evictions')
+ * app.register_blueprint(document_bp, url_prefix='/documents')
+ * app.register_blueprint(payment_bp, url_prefix='/payments')
+ * app.register_blueprint(report_bp, url_prefix='/reports')
+ * app.register_blueprint(api_bp, url_prefix='/api')
+ * app.register_blueprint(admin_bp, url_prefix='/admin')
+ * ```
+ */
+
+// Route Naming Conventions
+/**
+ * Route URL patterns should follow these conventions:
+ * - Use lowercase words separated by hyphens
+ * - Use plural nouns for resource collections
+ * - Use resource IDs in URL paths
+ * - Use query parameters for filtering, sorting, and pagination
+ * - Use consistent naming across similar resources
+ * 
+ * Examples:
+ * - /properties
+ * - /properties/create
+ * - /properties/<uuid:property_id>
+ * - /properties/<uuid:property_id>/edit
+ * - /properties/<uuid:property_id>/units
+ * - /properties/<uuid:property_id>/units/create
+ * - /properties/<uuid:property_id>/units/<uuid:unit_id>
+ * - /evictions?status=active&sort=filing_date&order=desc&page=1
+ */
+
+// Authentication Routes
+/**
+ * Authentication blueprint should include the following routes:
+ * 
+ * ```python
+ * auth_bp = Blueprint('auth', __name__)
+ * 
+ * @auth_bp.route('/login', methods=['GET', 'POST'])
+ * def login():
+ *     # Login logic
+ *     pass
+ * 
+ * @auth_bp.route('/logout')
+ * @login_required
+ * def logout():
+ *     # Logout logic
+ *     pass
+ * 
+ * @auth_bp.route('/register', methods=['GET', 'POST'])
+ * def register():
+ *     # Registration logic
+ *     pass
+ * 
+ * @auth_bp.route('/forgot-password', methods=['GET', 'POST'])
+ * def forgot_password():
+ *     # Password reset request logic
+ *     pass
+ * 
+ * @auth_bp.route('/reset-password/<token>', methods=['GET', 'POST'])
+ * def reset_password(token):
+ *     # Password reset with token logic
+ *     pass
+ * 
+ * @auth_bp.route('/profile', methods=['GET', 'POST'])
+ * @login_required
+ * def profile():
+ *     # User profile edit logic
+ *     pass
+ * 
+ * @auth_bp.route('/change-password', methods=['GET', 'POST'])
+ * @login_required
+ * def change_password():
+ *     # Password change logic
+ *     pass
+ * 
+ * @auth_bp.route('/verify-email/<token>')
+ * def verify_email(token):
+ *     # Email verification logic
+ *     pass
+ * ```
+ */
+
+// Dashboard Routes
+/**
+ * Dashboard blueprint should include the following routes:
+ * 
+ * ```python
+ * dashboard_bp = Blueprint('dashboard', __name__)
+ * 
+ * @dashboard_bp.route('/')
+ * @login_required
+ * def index():
+ *     # Main dashboard view based on user role
+ *     if current_user.role == 'admin':
+ *         return render_template('dashboard/admin_dashboard.html')
+ *     elif current_user.role == 'landlord':
+ *         return render_template('dashboard/landlord_dashboard.html')
+ *     elif current_user.role == 'tenant':
+ *         return render_template('dashboard/tenant_dashboard.html')
+ *     else:
+ *         return render_template('dashboard/default_dashboard.html')
+ * 
+ * @dashboard_bp.route('/analytics')
+ * @login_required
+ * @role_required(['admin', 'landlord'])
+ * def analytics():
+ *     # Analytics dashboard
+ *     pass
+ * 
+ * @dashboard_bp.route('/calendar')
+ * @login_required
+ * def calendar():
+ *     # Calendar view
+ *     pass
+ * 
+ * @dashboard_bp.route('/notifications')
+ * @login_required
+ * def notifications():
+ *     # User notifications center
+ *     pass
+ * 
+ * @dashboard_bp.route('/activity')
+ * @login_required
+ * def activity():
+ *     # User activity log
+ *     pass
+ * ```
+ */
+
+// Property Routes
+/**
+ * Property blueprint should include the following routes:
+ * 
+ * ```python
+ * property_bp = Blueprint('properties', __name__)
+ * 
+ * @property_bp.route('/')
+ * @login_required
+ * @role_required(['admin', 'landlord', 'manager'])
+ * def list_properties():
+ *     # List properties with filtering and pagination
+ *     pass
+ * 
+ * @property_bp.route('/create', methods=['GET', 'POST'])
+ * @login_required
+ * @role_required(['admin', 'landlord'])
+ * def create_property():
+ *     # Create new property
+ *     pass
+ * 
+ * @property_bp.route('/<uuid:property_id>')
+ * @login_required
+ * @property_access_required
+ * def view_property(property_id):
+ *     # View property details
+ *     pass
+ * 
+ * @property_bp.route('/<uuid:property_id>/edit', methods=['GET', 'POST'])
+ * @login_required
+ * @property_access_required
+ * def edit_property(property_id):
+ *     # Edit property
+ *     pass
+ * 
+ * @property_bp.route('/<uuid:property_id>/delete', methods=['POST'])
+ * @login_required
+ * @role_required(['admin', 'landlord'])
+ * def delete_property(property_id):
+ *     # Delete property
+ *     pass
+ * 
+ * @property_bp.route('/<uuid:property_id>/units')
+ * @login_required
+ * @property_access_required
+ * def list_units(property_id):
+ *     # List property units
+ *     pass
+ * 
+ * @property_bp.route('/<uuid:property_id>/units/create', methods=['GET', 'POST'])
+ * @login_required
+ * @property_access_required
+ * def create_unit(property_id):
+ *     # Create property unit
+ *     pass
+ * 
+ * @property_bp.route('/<uuid:property_id>/units/<uuid:unit_id>')
+ * @login_required
+ * @property_access_required
+ * def view_unit(property_id, unit_id):
+ *     # View unit details
+ *     pass
+ * 
+ * @property_bp.route('/<uuid:property_id>/units/<uuid:unit_id>/edit', methods=['GET', 'POST'])
+ * @login_required
+ * @property_access_required
+ * def edit_unit(property_id, unit_id):
+ *     # Edit unit
+ *     pass
+ * 
+ * @property_bp.route('/<uuid:property_id>/units/<uuid:unit_id>/delete', methods=['POST'])
+ * @login_required
+ * @property_access_required
+ * def delete_unit(property_id, unit_id):
+ *     # Delete unit
+ *     pass
+ * 
+ * @property_bp.route('/<uuid:property_id>/managers')
+ * @login_required
+ * @property_access_required
+ * def manage_property_managers(property_id):
+ *     # Manage property managers
+ *     pass
+ * ```
+ */
+
+// Tenant Routes
+/**
+ * Tenant blueprint should include the following routes:
+ * 
+ * ```python
+ * tenant_bp = Blueprint('tenants', __name__)
+ * 
+ * @tenant_bp.route('/')
+ * @login_required
+ * @role_required(['admin', 'landlord', 'manager'])
+ * def list_tenants():
+ *     # List tenants with filtering and pagination
+ *     pass
+ * 
+ * @tenant_bp.route('/create', methods=['GET', 'POST'])
+ * @login_required
+ * @role_required(['admin', 'landlord', 'manager'])
+ * def create_tenant():
+ *     # Create new tenant
+ *     pass
+ * 
+ * @tenant_bp.route('/<uuid:tenant_id>')
+ * @login_required
+ * @tenant_access_required
+ * def view_tenant(tenant_id):
+ *     # View tenant details
+ *     pass
+ * 
+ * @tenant_bp.route('/<uuid:tenant_id>/edit', methods=['GET', 'POST'])
+ * @login_required
+ * @tenant_access_required
+ * def edit_tenant(tenant_id):
+ *     # Edit tenant
+ *     pass
+ * 
+ * @tenant_bp.route('/<uuid:tenant_id>/delete', methods=['POST'])
+ * @login_required
+ * @role_required(['admin', 'landlord'])
+ * def delete_tenant(tenant_id):
+ *     # Delete tenant
+ *     pass
+ * 
+ * @tenant_bp.route('/<uuid:tenant_id>/leases')
+ * @login_required
+ * @tenant_access_required
+ * def tenant_leases(tenant_id):
+ *     # View tenant's leases
+ *     pass
+ * 
+ * @tenant_bp.route('/<uuid:tenant_id>/payments')
+ * @login_required
+ * @tenant_access_required
+ * def tenant_payments(tenant_id):
+ *     # View tenant's payment history
+ *     pass
+ * 
+ * @tenant_bp.route('/<uuid:tenant_id>/documents')
+ * @login_required
+ * @tenant_access_required
+ * def tenant_documents(tenant_id):
+ *     # View tenant's documents
+ *     pass
+ * 
+ * @tenant_bp.route('/<uuid:tenant_id>/evictions')
+ * @login_required
+ * @tenant_access_required
+ * def tenant_evictions(tenant_id):
+ *     # View tenant's eviction cases
+ *     pass
+ * ```
+ */
+
+// Eviction Routes
+/**
+ * Eviction blueprint should include the following routes:
+ * 
+ * ```python
+ * eviction_bp = Blueprint('evictions', __name__)
+ * 
+ * @eviction_bp.route('/')
+ * @login_required
+ * @role_required(['admin', 'landlord', 'manager', 'legal'])
+ * def list_evictions():
+ *     # List eviction cases with filtering and pagination
+ *     pass
+ * 
+ * @eviction_bp.route('/create', methods=['GET', 'POST'])
+ * @login_required
+ * @role_required(['admin', 'landlord', 'manager', 'legal'])
+ * def create_eviction():
+ *     # Create new eviction case
+ *     pass
+ * 
+ * @eviction_bp.route('/<uuid:eviction_id>')
+ * @login_required
+ * @eviction_access_required
+ * def view_eviction(eviction_id):
+ *     # View eviction case details
+ *     pass
+ * 
+ * @eviction_bp.route('/<uuid:eviction_id>/edit', methods=['GET', 'POST'])
+ * @login_required
+ * @eviction_access_required
+ * def edit_eviction(eviction_id):
+ *     # Edit eviction case
+ *     pass
+ * 
+ * @eviction_bp.route('/<uuid:eviction_id>/delete', methods=['POST'])
+ * @login_required
+ * @role_required(['admin', 'landlord', 'legal'])
+ * def delete_eviction(eviction_id):
+ *     # Delete eviction case
+ *     pass
+ * 
+ * @eviction_bp.route('/<uuid:eviction_id>/timeline')
+ * @login_required
+ * @eviction_access_required
+ * def eviction_timeline(eviction_id):
+ *     # View eviction timeline
+ *     pass
+ * 
+ * @eviction_bp.route('/<uuid:eviction_id>/documents')
+ * @login_required
+ * @eviction_access_required
+ * def eviction_documents(eviction_id):
+ *     # View eviction documents
+ *     pass
+ * 
+ * @eviction_bp.route('/<uuid:eviction_id>/events')
+ * @login_required
+ * @eviction_access_required
+ * def eviction_events(eviction_id):
+ *     # View eviction events
+ *     pass
+ * 
+ * @eviction_bp.route('/<uuid:eviction_id>/events/create', methods=['GET', 'POST'])
+ * @login_required
+ * @eviction_access_required
+ * def create_eviction_event(eviction_id):
+ *     # Create eviction event
+ *     pass
+ * 
+ * @eviction_bp.route('/<uuid:eviction_id>/payments')
+ * @login_required
+ * @eviction_access_required
+ * def eviction_payments(eviction_id):
+ *     # View eviction payments
+ *     pass
+ * 
+ * @eviction_bp.route('/<uuid:eviction_id>/calculator')
+ * @login_required
+ * @eviction_access_required
+ * def eviction_calculator(eviction_id):
+ *     # Eviction timeline calculator
+ *     pass
+ * ```
+ */
+
+// Document Routes
+/**
+ * Document blueprint should include the following routes:
+ * 
+ * ```python
+ * document_bp = Blueprint('documents', __name__)
+ * 
+ * @document_bp.route('/')
+ * @login_required
+ * def list_documents():
+ *     # List documents with filtering and pagination
+ *     pass
+ * 
+ * @document_bp.route('/create', methods=['GET', 'POST'])
+ * @login_required
+ * def create_document():
+ *     # Upload new document
+ *     pass
+ * 
+ * @document_bp.route('/<uuid:document_id>')
+ * @login_required
+ * @document_access_required
+ * def view_document(document_id):
+ *     # View document details
+ *     pass
+ * 
+ * @document_bp.route('/<uuid:document_id>/download')
+ * @login_required
+ * @document_access_required
+ * def download_document(document_id):
+ *     # Download document
+ *     pass
+ * 
+ * @document_bp.route('/<uuid:document_id>/edit', methods=['GET', 'POST'])
+ * @login_required
+ * @document_access_required
+ * def edit_document(document_id):
+ *     # Edit document metadata
+ *     pass
+ * 
+ * @document_bp.route('/<uuid:document_id>/delete', methods=['POST'])
+ * @login_required
+ * @document_access_required
+ * def delete_document(document_id):
+ *     # Delete document
+ *     pass
+ * 
+ * @document_bp.route('/generate/notice', methods=['GET', 'POST'])
+ * @login_required
+ * @role_required(['admin', 'landlord', 'manager', 'legal'])
+ * def generate_notice():
+ *     # Generate eviction notice
+ *     pass
+ * 
+ * @document_bp.route('/generate/filing', methods=['GET', 'POST'])
+ * @login_required
+ * @role_required(['admin', 'landlord', 'manager', 'legal'])
+ * def generate_filing():
+ *     # Generate court filing document
+ *     pass
+ * ```
+ */
+
+// Report Routes
+/**
+ * Report blueprint should include the following routes:
+ * 
+ * ```python
+ * report_bp = Blueprint('reports', __name__)
+ * 
+ * @report_bp.route('/')
+ * @login_required
+ * @role_required(['admin', 'landlord', 'manager'])
+ * def list_reports():
+ *     # List reports
+ *     pass
+ * 
+ * @report_bp.route('/create', methods=['GET', 'POST'])
+ * @login_required
+ * @role_required(['admin', 'landlord', 'manager'])
+ * def create_report():
+ *     # Create custom report
+ *     pass
+ * 
+ * @report_bp.route('/<uuid:report_id>')
+ * @login_required
+ * @report_access_required
+ * def view_report(report_id):
+ *     # View report
+ *     pass
+ * 
+ * @report_bp.route('/<uuid:report_id>/download')
+ * @login_required
+ * @report_access_required
+ * def download_report(report_id):
+ *     # Download report as PDF/CSV
+ *     pass
+ * 
+ * @report_bp.route('/<uuid:report_id>/edit', methods=['GET', 'POST'])
+ * @login_required
+ * @report_access_required
+ * def edit_report(report_id):
+ *     # Edit report configuration
+ *     pass
+ * 
+ * @report_bp.route('/<uuid:report_id>/delete', methods=['POST'])
+ * @login_required
+ * @report_access_required
+ * def delete_report(report_id):
+ *     # Delete report
+ *     pass
+ * 
+ * @report_bp.route('/generate/eviction-summary', methods=['GET', 'POST'])
+ * @login_required
+ * @role_required(['admin', 'landlord', 'manager'])
+ * def eviction_summary_report():
+ *     # Generate eviction summary report
+ *     pass
+ * 
+ * @report_bp.route('/generate/property-performance', methods=['GET', 'POST'])
+ * @login_required
+ * @role_required(['admin', 'landlord', 'manager'])
+ * def property_performance_report():
+ *     # Generate property performance report
+ *     pass
+ * 
+ * @report_bp.route('/generate/tenant-payment-history', methods=['GET', 'POST'])
+ * @login_required
+ * @role_required(['admin', 'landlord', 'manager'])
+ * def tenant_payment_history_report():
+ *     # Generate tenant payment history report
+ *     pass
+ * ```
+ */
+
+// API Routes
+/**
+ * API blueprint should include RESTful routes:
+ * 
+ * ```python
+ * api_bp = Blueprint('api', __name__)
+ * 
+ * # Auth API
+ * @api_bp.route('/auth/login', methods=['POST'])
+ * def api_login():
+ *     # API login
+ *     pass
+ * 
+ * @api_bp.route('/auth/refresh', methods=['POST'])
+ * @jwt_required(refresh=True)
+ * def api_refresh():
+ *     # Refresh access token
+ *     pass
+ * 
+ * # Properties API
+ * @api_bp.route('/properties', methods=['GET'])
+ * @jwt_required()
+ * def api_get_properties():
+ *     # Get properties
+ *     pass
+ * 
+ * @api_bp.route('/properties', methods=['POST'])
+ * @jwt_required()
+ * @role_required(['admin', 'landlord'])
+ * def api_create_property():
+ *     # Create property
+ *     pass
+ * 
+ * @api_bp.route('/properties/<uuid:property_id>', methods=['GET'])
+ * @jwt_required()
+ * @property_access_required
+ * def api_get_property(property_id):
+ *     # Get property
+ *     pass
+ * 
+ * @api_bp.route('/properties/<uuid:property_id>', methods=['PUT'])
+ * @jwt_required()
+ * @property_access_required
+ * def api_update_property(property_id):
+ *     # Update property
+ *     pass
+ * 
+ * @api_bp.route('/properties/<uuid:property_id>', methods=['DELETE'])
+ * @jwt_required()
+ * @role_required(['admin', 'landlord'])
+ * def api_delete_property(property_id):
+ *     # Delete property
+ *     pass
+ * 
+ * # Similar CRUD routes for other resources:
+ * # - /api/tenants
+ * # - /api/leases
+ * # - /api/evictions
+ * # - /api/documents
+ * # - /api/payments
+ * # - /api/reports
+ * ```
+ */
+
+// Route Protection
+/**
+ * Implement the following decorators for route protection:
+ * 
+ * ```python
+ * from functools import wraps
+ * from flask import abort, g, request
+ * from flask_login import current_user
+ * 
+ * def login_required(f):
+ *     @wraps(f)
+ *     def decorated_function(*args, **kwargs):
+ *         if not current_user.is_authenticated:
+ *             return redirect(url_for('auth.login', next=request.url))
+ *         return f(*args, **kwargs)
+ *     return decorated_function
+ * 
+ * def role_required(roles):
+ *     def decorator(f):
+ *         @wraps(f)
+ *         def decorated_function(*args, **kwargs):
+ *             if not current_user.is_authenticated or current_user.role not in roles:
+ *                 abort(403)
+ *             return f(*args, **kwargs)
+ *         return decorated_function
+ *     return decorator
+ * 
+ * def property_access_required(f):
+ *     @wraps(f)
+ *     def decorated_function(*args, **kwargs):
+ *         property_id = kwargs.get('property_id')
+ *         if not property_id:
+ *             abort(400)
+ *         
+ *         # Check if user has access to property
+ *         if current_user.role == 'admin':
+ *             return f(*args, **kwargs)
+ *             
+ *         property = Property.query.get_or_404(property_id)
+ *         
+ *         if property.owner_id == current_user.id:
+ *             return f(*args, **kwargs)
+ *             
+ *         if current_user.role == 'manager':
+ *             property_manager = PropertyManager.query.filter_by(
+ *                 property_id=property_id,
+ *                 user_id=current_user.id,
+ *                 end_date=None
+ *             ).first()
+ *             
+ *             if property_manager:
+ *                 return f(*args, **kwargs)
+ *                 
+ *         abort(403)
+ *     return decorated_function
+ * 
+ * # Similar decorators for:
+ * # - tenant_access_required
+ * # - lease_access_required
+ * # - eviction_access_required
+ * # - document_access_required
+ * # - report_access_required
+ * ```
+ */
+
+// Request Parameter Handling
+/**
+ * Standardize parameter handling in routes:
+ * 
+ * ```python
+ * def get_pagination_params():
+ *     """Get standard pagination parameters from request."""
+ *     page = request.args.get('page', 1, type=int)
+ *     per_page = min(
+ *         request.args.get('per_page', 20, type=int), 
+ *         100  # Maximum items per page
+ *     )
+ *     return page, per_page
+ * 
+ * def get_filtering_params(allowed_filters):
+ *     """Get filtering parameters from request."""
+ *     filters = {}
+ *     for key in allowed_filters:
+ *         if key in request.args:
+ *             filters[key] = request.args.get(key)
+ *     return filters
+ * 
+ * def get_sorting_params(allowed_sort_fields, default_sort=None):
+ *     """Get sorting parameters from request."""
+ *     sort_field = request.args.get('sort')
+ *     sort_order = request.args.get('order', 'asc').lower()
+ *     
+ *     if sort_field not in allowed_sort_fields:
+ *         sort_field = default_sort or allowed_sort_fields[0]
+ *         
+ *     if sort_order not in ['asc', 'desc']:
+ *         sort_order = 'asc'
+ *         
+ *     return sort_field, sort_order
+ * 
+ * # Example usage in a route
+ * @property_bp.route('/')
+ * @login_required
+ * def list_properties():
+ *     page, per_page = get_pagination_params()
+ *     filters = get_filtering_params(['status', 'property_type', 'city', 'state'])
+ *     sort_field, sort_order = get_sorting_params(
+ *         ['name', 'city', 'state', 'created_at'], 
+ *         default_sort='name'
+ *     )
+ *     
+ *     # Apply filters, sorting, and pagination to query
+ *     query = Property.query
+ *     
+ *     if current_user.role != 'admin':
+ *         query = query.filter_by(owner_id=current_user.id)
+ *         
+ *     for key, value in filters.items():
+ *         if value:
+ *             query = query.filter(getattr(Property, key) == value)
+ *             
+ *     if sort_order == 'asc':
+ *         query = query.order_by(getattr(Property, sort_field).asc())
+ *     else:
+ *         query = query.order_by(getattr(Property, sort_field).desc())
+ *         
+ *     pagination = query.paginate(page=page, per_page=per_page)
+ *     
+ *     return render_template(
+ *         'properties/list.html',
+ *         properties=pagination.items,
+ *         pagination=pagination,
+ *         filters=filters,
+ *         sort_field=sort_field,
+ *         sort_order=sort_order
+ *     )
+ * ```
+ */
+
+// Response Format
+/**
+ * Standardize response format:
+ * 
+ * ```python
+ * from flask import jsonify
+ * 
+ * def api_response(data=None, message=None, status='success', status_code=200, metadata=None):
+ *     """Standard API response format."""
+ *     response = {
+ *         'status': status,
+ *         'message': message,
+ *         'data': data,
+ *         'metadata': metadata or {}
+ *     }
+ *     return jsonify(response), status_code
+ * 
+ * def error_response(message, status_code=400, error_code=None):
+ *     """Standard error response format."""
+ *     response = {
+ *         'status': 'error',
+ *         'message': message,
+ *         'error_code': error_code,
+ *         'data': None,
+ *         'metadata': {}
+ *     }
+ *     return jsonify(response), status_code
+ * 
+ * # Example usage
+ * @api_bp.route('/properties')
+ * @jwt_required()
+ * def api_get_properties():
+ *     try:
+ *         page, per_page = get_pagination_params()
+ *         properties = Property.query.filter_by(owner_id=current_user.id).paginate(page=page, per_page=per_page)
+ *         
+ *         metadata = {
+ *             'pagination': {
+ *                 'page': page,
+ *                 'per_page': per_page,
+ *                 'total_pages': properties.pages,
+ *                 'total_items': properties.total
+ *             }
+ *         }
+ *         
+ *         return api_response(
+ *             data=[p.to_dict() for p in properties.items],
+ *             message="Properties retrieved successfully",
+ *             metadata=metadata
+ *         )
+ *     except Exception as e:
+ *         return error_response(str(e), 500)
+ * ```
+ */
+
+// Error Handling
+/**
+ * Implement centralized error handling:
+ * 
+ * ```python
+ * from flask import render_template
+ * 
+ * @app.errorhandler(404)
+ * def page_not_found(e):
+ *     return render_template('errors/404.html'), 404
+ * 
+ * @app.errorhandler(403)
+ * def forbidden(e):
+ *     return render_template('errors/403.html'), 403
+ * 
+ * @app.errorhandler(500)
+ * def internal_server_error(e):
+ *     return render_template('errors/500.html'), 500
+ * 
+ * @app.errorhandler(400)
+ * def bad_request(e):
+ *     return render_template('errors/400.html'), 400
+ * 
+ * # API error handlers
+ * @api_bp.errorhandler(404)
+ * def api_not_found(e):
+ *     return error_response("Resource not found", 404, "NOT_FOUND")
+ * 
+ * @api_bp.errorhandler(403)
+ * def api_forbidden(e):
+ *     return error_response("Access forbidden", 403, "FORBIDDEN")
+ * 
+ * @api_bp.errorhandler(400)
+ * def api_bad_request(e):
+ *     return error_response("Bad request", 400, "BAD_REQUEST")
+ * 
+ * @api_bp.errorhandler(500)
+ * def api_server_error(e):
+ *     return error_response("Internal server error", 500, "SERVER_ERROR")
+ * ```
+ */
+
+// Route Context Processors
+/**
+ * Use context processors to inject common data into templates:
+ * 
+ * ```python
+ * @app.context_processor
+ * def inject_user_notifications():
+ *     """Inject unread notification count for current user."""
+ *     if current_user.is_authenticated:
+ *         notification_count = Notification.query.filter_by(
+ *             user_id=current_user.id,
+ *             status='unread'
+ *         ).count()
+ *         return {'notification_count': notification_count}
+ *     return {'notification_count': 0}
+ * 
+ * @app.context_processor
+ * def inject_system_info():
+ *     """Inject system information into all templates."""
+ *     return {
+ *         'app_name': 'Eviction Management System',
+ *         'app_version': '1.0.0',
+ *         'current_year': datetime.now().year
+ *     }
+ * 
+ * @property_bp.context_processor
+ * def inject_property_types():
+ *     """Inject property types for property blueprint templates."""
+ *     return {
+ *         'property_types': [
+ *             ('single_family', 'Single Family'),
+ *             ('multi_family', 'Multi Family'),
+ *             ('apartment', 'Apartment'),
+ *             ('condo', 'Condominium'),
+ *             ('commercial', 'Commercial'),
+ *             ('other', 'Other')
+ *         ]
+ *     }
+ * ```
+ */
+
+// Before/After Request Hooks
+/**
+ * Use request hooks for common operations:
+ * 
+ * ```python
+ * @app.before_request
+ * def update_last_seen():
+ *     """Update user's last seen timestamp."""
+ *     if current_user.is_authenticated:
+ *         current_user.last_seen = datetime.utcnow()
+ *         db.session.commit()
+ * 
+ * @app.before_request
+ * def check_user_status():
+ *     """Check if user account is active."""
+ *     if current_user.is_authenticated and current_user.status != 'active':
+ *         logout_user()
+ *         flash('Your account has been deactivated.', 'danger')
+ *         return redirect(url_for('auth.login'))
+ * 
+ * @app.after_request
+ * def add_security_headers(response):
+ *     """Add security headers to all responses."""
+ *     response.headers['Content-Security-Policy'] = "default-src 'self'"
+ *     response.headers['X-Content-Type-Options'] = 'nosniff'
+ *     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+ *     response.headers['X-XSS-Protection'] = '1; mode=block'
+ *     return response
+ * ```
+ */
+
+// URL Generation
+/**
+ * Use consistent URL generation:
+ * 
+ * ```python
+ * # In templates
+ * <a href="{{ url_for('properties.view_property', property_id=property.id) }}">
+ *     {{ property.name }}
+ * </a>
+ * 
+ * # In Python code
+ * redirect(url_for('properties.view_property', property_id=property.id))
+ * ```
+ */
+
+// Route Documentation
+/**
+ * Document routes with docstrings:
+ * 
+ * ```python
+ * @property_bp.route('/<uuid:property_id>')
+ * @login_required
+ * @property_access_required
+ * def view_property(property_id):
+ *     """
+ *     Display property details.
+ *     
+ *     Args:
+ *         property_id (UUID): The unique identifier of the property.
+ *     
+ *     Returns:
+ *         Rendered template with property details.
+ *     
+ *     Permission:
+ *         - Property owner
+ *         - Property manager
+ *         - Admin
+ *     """
+ *     property = Property.query.get_or_404(property_id)
+ *     units = PropertyUnit.query.filter_by(property_id=property_id).all()
+ *     managers = PropertyManager.query.filter_by(property_id=property_id).all()
+ *     
+ *     return render_template(
+ *         'properties/view.html',
+ *         property=property,
+ *         units=units,
+ *         managers=managers
+ *     )
+ * ```
+ */
+
+// Route Testing
+/**
+ * Tests should cover:
+ * - Authentication and permissions
+ * - URL patterns and parameters
+ * - Responses and status codes
+ * - Template rendering
+ * - Form handling
+ * 
+ * ```python
+ * def test_property_list(client, auth):
+ *     # Test unauthorized access
+ *     response = client.get('/properties')
+ *     assert response.status_code == 302  # Redirect to login
+ *     
+ *     # Test authorized access
+ *     auth.login('landlord@example.com', 'password')
+ *     response = client.get('/properties')
+ *     assert response.status_code == 200
+ *     
+ *     # Test content
+ *     assert b'Properties' in response.data
+ *     
+ *     # Test pagination
+ *     response = client.get('/properties?page=1&per_page=10')
+ *     assert response.status_code == 200
+ *     
+ *     # Test filtering
+ *     response = client.get('/properties?status=active&property_type=apartment')
+ *     assert response.status_code == 200
+ *     
+ *     # Test sorting
+ *     response = client.get('/properties?sort=name&order=desc')
+ *     assert response.status_code == 200
+ * ```
+ */ 

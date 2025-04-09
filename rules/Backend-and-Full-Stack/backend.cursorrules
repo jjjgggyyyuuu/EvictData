@@ -1,0 +1,154 @@
+# Backend Development Rules
+
+## Project Structure
+```
+src/
+  ├── api/
+  │   ├── routes/
+  │   ├── controllers/
+  │   ├── middleware/
+  │   └── validators/
+  ├── models/
+  ├── services/
+  ├── utils/
+  ├── config/
+  └── tests/
+```
+
+## API Design
+- RESTful principles
+- Proper HTTP methods
+- Consistent endpoints
+- Versioning strategy
+- Rate limiting
+- Response formats
+
+## Database
+- Schema design
+- Relationships
+- Indexing strategy
+- Query optimization
+- Migration handling
+- Backup strategy
+
+## Authentication
+- JWT implementation
+- Role-based access
+- Session management
+- Password hashing
+- Token refresh
+- Security headers
+
+## Features
+
+### Property Management
+- CRUD operations
+- Search/filter
+- Bulk operations
+- File uploads
+- Audit logging
+- Data validation
+
+### Tenant Management
+- Profile management
+- Payment tracking
+- Document storage
+- Communication
+- History tracking
+- Status updates
+
+### Eviction Processing
+- Case management
+- Timeline tracking
+- Document generation
+- Status updates
+- Court integration
+- Payment tracking
+
+### Reporting System
+- Data aggregation
+- Custom queries
+- Export formats
+- Scheduled reports
+- Email delivery
+- Access control
+
+### Financial Operations
+- Payment processing
+- Invoice generation
+- Late fee calculation
+- Refund handling
+- Account balance
+- Transaction logs
+
+## Security
+- Input sanitization
+- SQL injection
+- XSS prevention
+- CSRF protection
+- Rate limiting
+- Data encryption
+
+## Performance
+- Caching strategy
+- Query optimization
+- Connection pooling
+- Load balancing
+- Memory management
+- Monitoring
+
+## Error Handling
+- Global handler
+- Custom errors
+- Logging strategy
+- Client feedback
+- Recovery process
+- Monitoring
+
+## Testing
+- Unit tests
+- Integration tests
+- Load testing
+- Security tests
+- Coverage goals
+- Mocking strategy
+
+## Documentation
+- API docs
+- Code comments
+- Setup guide
+- Testing guide
+- Deployment guide
+- Troubleshooting
+
+## Development
+- Git workflow
+- Code review
+- CI/CD pipeline
+- Environment setup
+- Debug tools
+- Logging tools
+
+## Monitoring
+- Error tracking
+- Performance metrics
+- Usage analytics
+- Health checks
+- Alerting system
+- Log aggregation
+
+## Deployment
+- Environment config
+- Container setup
+- Scaling strategy
+- Backup system
+- Recovery plan
+- Rollback process
+
+## Compliance
+- Data privacy
+- Legal requirements
+- Audit trails
+- Data retention
+- Access controls
+- Reporting 

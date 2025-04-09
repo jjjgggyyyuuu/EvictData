@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+
+{% block title %}Preview Import{% endblock %}
+
+{% block styles %}
+<style>
+    .preview-table th {
+        min-width: 120px;
+    }
+    .badge-success {
+        background-color: #28a745;
+    }
+    .badge-warning {
+        background-color: #ffc107;
+        color: #212529;
+    }
+    .badge-danger {
+        background-color: #dc3545;
+    }
+    .status-badge {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 6px;
+    }
+    .stat-card {
+        transition: all 0.3s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-4 mb-4">Preview Import</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Import Preview</h5>
+        </div>
+        <div class="card-body">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            {% if preview.error %}
+                <div class="alert alert-danger">
+                    <h5><i class="fas fa-exclamation-triangle me-2"></i>Error Generating Preview</h5>
+                    <p>{{ preview.error }}</p>
+                    <a href="{{ url_for('import_page') }}" class="btn btn-primary mt-2">Go Back to Import</a>
+                </div>
+            {% else %}
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card bg-primary text-white stat-card">
+                            <div class="card-body text-center">
+                                <h3 class="display-4">{{ preview.row_count }}</h3>
+                                <p class="lead">Rows to Import</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white stat-card">
+                            <div class="card-body text-center">
+                                <h3 class="display-4">{{ preview.mapped_field_count }}</h3>
+                                <p class="lead">Fields Mapped</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white stat-card">
+                            <div class="card-body text-center">
+                                <h3 class="display-4">{{ preview.date_format_samples|length }}</h3>
+                                <p class="lead">Date Fields</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-warning text-dark stat-card">
+                            <div class="card-body text-center">
+                                <h3 class="display-4">{{ preview.unmapped_fields|length }}</h3>
+                                <p class="lead">Unmapped Fields</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info mb-4">
+                    <h5><i class="fas fa-info-circle me-2"></i>Preview Information</h5>
+                    <p>This is a preview of how your data will be imported based on the column mapping you provided. Please review it carefully before proceeding with the import.</p>
+                </div>
+                
+                <h4 class="mb-3">Data Sample</h4>
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered preview-table">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Database Field</th>
+                                <th>CSV Column</th>
+                                <th>Sample Value 1</th>
+                                <th>Sample Value 2</th>
+                                <th>Sample Value 3</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for field, csv_column in column_mapping.items() %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ field|replace('_', ' ')|title }}</strong>
+                                        {% if field in preview.date_format_samples %}
+                                            <span class="badge bg-info">Date</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ csv_column }}</td>
+                                    {% if field in preview.preview_data %}
+                                        {% for i in range(min(3, preview.preview_data[field]|length)) %}
+                                            <td>
+                                                {% if preview.preview_data[field][i] is not none %}
+                                                    {% if field == 'status' %}
+                                                        <span class="badge 
+                                                            {% if preview.preview_data[field][i] == 'pending' %}bg-secondary{% 
+                                                            elif preview.preview_data[field][i] == 'active' %}bg-primary{% 
+                                                            elif preview.preview_data[field][i] == 'judgment' %}bg-warning{% 
+                                                            elif preview.preview_data[field][i] == 'writ' %}bg-danger{% 
+                                                            elif preview.preview_data[field][i] == 'completed' %}bg-success{% 
+                                                            else %}bg-info{% endif %}">
+                                                            {{ preview.preview_data[field][i] }}
+                                                        </span>
+                                                    {% elif field in preview.date_format_samples %}
+                                                        <span class="text-primary">{{ preview.preview_data[field][i] }}</span>
+                                                    {% elif field == 'judgment_amount' and preview.preview_data[field][i] %}
+                                                        ${{ preview.preview_data[field][i] }}
+                                                    {% else %}
+                                                        {{ preview.preview_data[field][i] }}
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="text-muted">null</span>
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                        {% if preview.preview_data[field]|length < 3 %}
+                                            {% for i in range(3 - preview.preview_data[field]|length) %}
+                                                <td><span class="text-muted">—</span></td>
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% else %}
+                                        <td colspan="3" class="text-center text-muted">No data available</td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-4">
+                    <h4 class="mb-3">Date Formatting</h4>
+                    {% if preview.date_format_samples %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Field</th>
+                                        <th>Format Sample</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for field, sample in preview.date_format_samples.items() %}
+                                        <tr>
+                                            <td>{{ field|replace('_', ' ')|title }}</td>
+                                            <td>
+                                                {% if 'Error' in sample %}
+                                                    <span class="text-danger">{{ sample }}</span>
+                                                {% else %}
+                                                    <span class="text-success">{{ sample }}</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <p>No date fields were detected in your mapping.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mt-4">
+                    <h4 class="mb-3">Unmapped Fields</h4>
+                    {% if preview.unmapped_fields %}
+                        <div class="alert alert-warning">
+                            <p>The following fields from your CSV were not mapped to any database fields:</p>
+                            <ul>
+                                {% for field in preview.unmapped_fields %}
+                                    <li>{{ field }}</li>
+                                {% endfor %}
+                            </ul>
+                            <p>This data will not be imported. If you need to include this data, go back and update your mapping.</p>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-success">
+                            <p>All fields from your CSV are mapped to database fields.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <form action="{{ url_for('process_import') }}" method="post" class="mt-4">
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="confirm_import" name="confirm_import" required>
+                        <label class="form-check-label" for="confirm_import">
+                            I confirm that I want to import {{ preview.row_count }} records with the mapping shown above.
+                        </label>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('inspect_csv_route') }}" class="btn btn-secondary me-md-2" onclick="history.back(); return false;">Back to Mapping</a>
+                        <button type="submit" class="btn btn-primary">Import Data</button>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Import Process</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header">Step 1</div>
+                        <div class="card-body">
+                            <h5>Select CSV File</h5>
+                            <p>Choose a CSV file containing eviction data.</p>
+                        </div>
+                        <div class="card-footer">
+                            <i class="fas fa-check-circle text-success"></i> Completed
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header">Step 2</div>
+                        <div class="card-body">
+                            <h5>Map Columns</h5>
+                            <p>Match CSV columns to database fields.</p>
+                        </div>
+                        <div class="card-footer">
+                            <i class="fas fa-check-circle text-success"></i> Completed
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-primary h-100">
+                        <div class="card-header bg-primary text-white">Step 3</div>
+                        <div class="card-body">
+                            <h5>Preview & Import</h5>
+                            <p>Review the data and complete the import.</p>
+                        </div>
+                        <div class="card-footer bg-primary text-white">
+                            <i class="fas fa-arrow-circle-right"></i> You are here
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize Bootstrap tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
+{% endblock %} 

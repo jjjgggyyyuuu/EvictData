@@ -1,0 +1,722 @@
+# Flask Template Rules
+
+## Template Structure
+- Extend base.html for all templates
+- Use consistent block names
+- Organize CSS/JS includes properly
+- Follow responsive design principles
+
+## Base Template
+```html
+{% extends 'base.html' %}
+
+{% block title %}Page Title{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page content here -->
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Page-specific scripts -->
+{% endblock %}
+```
+
+## Styling Guidelines
+- Use Bootstrap classes consistently
+- Follow mobile-first approach
+- Maintain color scheme variables
+- Use proper spacing classes
+
+## Component Organization
+- Break down into reusable components
+- Use macros for repeated elements
+- Keep templates DRY
+- Document complex components
+
+## Form Handling
+- Use WTForms for form generation
+- Include CSRF protection
+- Implement proper validation
+- Show error messages clearly
+
+## JavaScript Integration
+- Load scripts at bottom of page
+- Use async/defer where appropriate
+- Implement proper error handling
+- Follow event delegation patterns
+
+## SEO Guidelines
+- Include proper meta tags
+- Use semantic HTML elements
+- Implement structured data
+- Optimize for accessibility
+
+## Error Templates
+- Create consistent error pages
+- Include helpful error messages
+- Provide navigation options
+- Log error occurrences 
+
+// Eviction Management System Flask Templates Rules
+// These rules define the structure and conventions for Flask templates
+
+// Directory Structure
+/**
+ * Templates should be organized in the following directory structure:
+ * 
+ * templates/
+ * ├── base.html                  # Base template with common elements
+ * ├── components/                # Reusable UI components
+ * │   ├── alerts.html            # Alert and notification components
+ * │   ├── forms.html             # Form field components and layouts
+ * │   ├── modals.html            # Modal dialog components
+ * │   ├── navigation.html        # Navigation components (navbar, sidebar)
+ * │   ├── pagination.html        # Pagination controls
+ * │   └── tables.html            # Table and data display components
+ * ├── layouts/                   # Page layout templates
+ * │   ├── dashboard.html         # Dashboard layout
+ * │   ├── fullwidth.html         # Full-width page layout
+ * │   └── sidebar.html           # Page with sidebar layout
+ * ├── pages/                     # Specific page templates
+ * │   ├── auth/                  # Authentication pages
+ * │   │   ├── login.html
+ * │   │   ├── register.html
+ * │   │   └── reset_password.html
+ * │   ├── dashboard/             # Dashboard pages
+ * │   │   ├── index.html
+ * │   │   ├── analytics.html
+ * │   │   └── reports.html
+ * │   ├── evictions/             # Eviction management pages
+ * │   │   ├── details.html
+ * │   │   ├── form.html
+ * │   │   ├── list.html
+ * │   │   └── timeline.html
+ * │   ├── properties/            # Property management pages
+ * │   │   ├── details.html
+ * │   │   ├── form.html
+ * │   │   └── list.html
+ * │   └── tenants/               # Tenant management pages
+ * │       ├── details.html
+ * │       ├── form.html
+ * │       └── list.html
+ * ├── emails/                    # Email templates
+ * │   ├── notification.html
+ * │   ├── password_reset.html
+ * │   └── welcome.html
+ * └── errors/                    # Error page templates
+ *     ├── 400.html
+ *     ├── 403.html
+ *     ├── 404.html
+ *     └── 500.html
+ */
+
+// Base Template Structure
+/**
+ * Every base.html template should include:
+ * - HTML5 doctype declaration
+ * - Viewport meta tag for responsive design
+ * - CSS and JavaScript includes in the appropriate locations
+ * - Flash message handling
+ * - Common navigation elements
+ * - Footer with copyright and legal information
+ * 
+ * Example structure:
+ * ```html
+ * <!DOCTYPE html>
+ * <html lang="en">
+ * <head>
+ *     <meta charset="UTF-8">
+ *     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ *     <title>{% block title %}Eviction Management System{% endblock %}</title>
+ *     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+ *     {% block extra_css %}{% endblock %}
+ * </head>
+ * <body class="{% block body_class %}{% endblock %}">
+ *     <header>
+ *         {% include 'components/navigation.html' %}
+ *     </header>
+ *     
+ *     <main class="container my-4">
+ *         {% include 'components/alerts.html' %}
+ *         {% block content %}{% endblock %}
+ *     </main>
+ *     
+ *     <footer class="footer mt-auto py-3 bg-light">
+ *         <div class="container">
+ *             <span class="text-muted">© 2025 Eviction Management System</span>
+ *         </div>
+ *     </footer>
+ *     
+ *     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+ *     {% block extra_js %}{% endblock %}
+ * </body>
+ * </html>
+ * ```
+ */
+
+// Component Guidelines
+/**
+ * Reusable components should:
+ * - Accept template variables for customization
+ * - Include default values where appropriate
+ * - Be well-documented with comments
+ * - Handle empty states gracefully
+ * 
+ * Example alert component:
+ * ```html
+ * {# components/alerts.html #}
+ * {% macro alert(type='info', dismissible=true, message='') %}
+ * <div class="alert alert-{{ type }} {% if dismissible %}alert-dismissible fade show{% endif %}" role="alert">
+ *     {{ message }}
+ *     {% if dismissible %}
+ *     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+ *     {% endif %}
+ * </div>
+ * {% endmacro %}
+ * 
+ * {# Usage in another template #}
+ * {% from 'components/alerts.html' import alert %}
+ * {{ alert('danger', true, 'This action cannot be undone.') }}
+ * ```
+ */
+
+// Form Handling
+/**
+ * Form templates should:
+ * - Use proper HTML5 form elements and attributes
+ * - Include CSRF protection
+ * - Provide clear validation feedback
+ * - Group related form elements together
+ * - Use consistent styling
+ * 
+ * Example form component:
+ * ```html
+ * {# components/forms.html #}
+ * {% macro form_field(field) %}
+ * <div class="mb-3">
+ *     {{ field.label(class="form-label") }}
+ *     {{ field(class="form-control " + ("is-invalid" if field.errors else "")) }}
+ *     {% if field.errors %}
+ *     <div class="invalid-feedback">
+ *         {% for error in field.errors %}
+ *         <span>{{ error }}</span>
+ *         {% endfor %}
+ *     </div>
+ *     {% endif %}
+ *     {% if field.description %}
+ *     <small class="form-text text-muted">{{ field.description }}</small>
+ *     {% endif %}
+ * </div>
+ * {% endmacro %}
+ * 
+ * {# Usage in another template #}
+ * {% from 'components/forms.html' import form_field %}
+ * <form method="post">
+ *     {{ form.csrf_token }}
+ *     {{ form_field(form.name) }}
+ *     {{ form_field(form.email) }}
+ *     <button type="submit" class="btn btn-primary">Submit</button>
+ * </form>
+ * ```
+ */
+
+// Data Display
+/**
+ * Data tables should:
+ * - Include responsive design considerations
+ * - Provide sorting options where appropriate
+ * - Include pagination for large datasets
+ * - Display clear empty states
+ * - Include action buttons with consistent styling
+ * 
+ * Example table component:
+ * ```html
+ * {# components/tables.html #}
+ * {% macro data_table(headers, data, actions=true) %}
+ * <div class="table-responsive">
+ *     <table class="table table-striped table-hover">
+ *         <thead>
+ *             <tr>
+ *                 {% for header in headers %}
+ *                 <th scope="col">{{ header }}</th>
+ *                 {% endfor %}
+ *                 {% if actions %}
+ *                 <th scope="col">Actions</th>
+ *                 {% endif %}
+ *             </tr>
+ *         </thead>
+ *         <tbody>
+ *             {% if data %}
+ *             {% for row in data %}
+ *             <tr>
+ *                 {% for cell in row %}
+ *                 <td>{{ cell }}</td>
+ *                 {% endfor %}
+ *                 {% if actions %}
+ *                 <td>
+ *                     <a href="{{ url_for('view_item', id=row.id) }}" class="btn btn-sm btn-info">View</a>
+ *                     <a href="{{ url_for('edit_item', id=row.id) }}" class="btn btn-sm btn-primary">Edit</a>
+ *                     <a href="{{ url_for('delete_item', id=row.id) }}" class="btn btn-sm btn-danger">Delete</a>
+ *                 </td>
+ *                 {% endif %}
+ *             </tr>
+ *             {% endfor %}
+ *             {% else %}
+ *             <tr>
+ *                 <td colspan="{{ headers|length + (1 if actions else 0) }}" class="text-center">
+ *                     No data available
+ *                 </td>
+ *             </tr>
+ *             {% endif %}
+ *         </tbody>
+ *     </table>
+ * </div>
+ * {% endmacro %}
+ * ```
+ */
+
+// Navigation
+/**
+ * Navigation components should:
+ * - Highlight active navigation items
+ * - Be responsive on all device sizes
+ * - Include proper accessibility attributes
+ * - Support both authenticated and unauthenticated states
+ * 
+ * Example navigation component:
+ * ```html
+ * {# components/navigation.html #}
+ * <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+ *     <div class="container-fluid">
+ *         <a class="navbar-brand" href="{{ url_for('index') }}">
+ *             <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" height="30">
+ *             Eviction Management
+ *         </a>
+ *         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+ *             <span class="navbar-toggler-icon"></span>
+ *         </button>
+ *         <div class="collapse navbar-collapse" id="navbarNav">
+ *             <ul class="navbar-nav me-auto">
+ *                 <li class="nav-item">
+ *                     <a class="nav-link {{ 'active' if request.endpoint == 'dashboard' }}" href="{{ url_for('dashboard') }}">Dashboard</a>
+ *                 </li>
+ *                 <li class="nav-item">
+ *                     <a class="nav-link {{ 'active' if 'evictions' in request.endpoint }}" href="{{ url_for('evictions.list') }}">Evictions</a>
+ *                 </li>
+ *                 <li class="nav-item">
+ *                     <a class="nav-link {{ 'active' if 'properties' in request.endpoint }}" href="{{ url_for('properties.list') }}">Properties</a>
+ *                 </li>
+ *                 <li class="nav-item">
+ *                     <a class="nav-link {{ 'active' if 'reports' in request.endpoint }}" href="{{ url_for('reports.list') }}">Reports</a>
+ *                 </li>
+ *             </ul>
+ *             <ul class="navbar-nav">
+ *                 {% if current_user.is_authenticated %}
+ *                 <li class="nav-item dropdown">
+ *                     <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button">
+ *                         {{ current_user.name }}
+ *                     </a>
+ *                     <ul class="dropdown-menu dropdown-menu-end">
+ *                         <li><a class="dropdown-item" href="{{ url_for('profile') }}">Profile</a></li>
+ *                         <li><a class="dropdown-item" href="{{ url_for('settings') }}">Settings</a></li>
+ *                         <li><hr class="dropdown-divider"></li>
+ *                         <li><a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a></li>
+ *                     </ul>
+ *                 </li>
+ *                 {% else %}
+ *                 <li class="nav-item">
+ *                     <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+ *                 </li>
+ *                 <li class="nav-item">
+ *                     <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+ *                 </li>
+ *                 {% endif %}
+ *             </ul>
+ *         </div>
+ *     </div>
+ * </nav>
+ * ```
+ */
+
+// Modals
+/**
+ * Modal components should:
+ * - Be accessible with proper attributes
+ * - Include header, body, and footer sections
+ * - Support form submission when required
+ * - Have clear action buttons
+ * 
+ * Example modal component:
+ * ```html
+ * {# components/modals.html #}
+ * {% macro modal(id, title, content, footer='', size='') %}
+ * <div class="modal fade" id="{{ id }}" tabindex="-1" aria-labelledby="{{ id }}Label" aria-hidden="true">
+ *     <div class="modal-dialog {{ size }}">
+ *         <div class="modal-content">
+ *             <div class="modal-header">
+ *                 <h5 class="modal-title" id="{{ id }}Label">{{ title }}</h5>
+ *                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+ *             </div>
+ *             <div class="modal-body">
+ *                 {{ content }}
+ *             </div>
+ *             {% if footer %}
+ *             <div class="modal-footer">
+ *                 {{ footer }}
+ *             </div>
+ *             {% endif %}
+ *         </div>
+ *     </div>
+ * </div>
+ * {% endmacro %}
+ * 
+ * {# Usage example #}
+ * {% from 'components/modals.html' import modal %}
+ * {% set content %}
+ *     <p>Are you sure you want to delete this eviction record?</p>
+ *     <p>This action cannot be undone.</p>
+ * {% endset %}
+ * {% set footer %}
+ *     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+ *     <form method="post" action="{{ url_for('delete_eviction', id=eviction.id) }}" class="d-inline">
+ *         <button type="submit" class="btn btn-danger">Delete</button>
+ *     </form>
+ * {% endset %}
+ * {{ modal('delete-modal', 'Confirm Deletion', content, footer) }}
+ * ```
+ */
+
+// Error Pages
+/**
+ * Error templates should:
+ * - Provide clear error messages
+ * - Offer helpful navigation options
+ * - Maintain consistent branding
+ * - Be responsive on all device sizes
+ * 
+ * Example 404 error page:
+ * ```html
+ * {# errors/404.html #}
+ * {% extends 'base.html' %}
+ * 
+ * {% block title %}Page Not Found{% endblock %}
+ * 
+ * {% block content %}
+ * <div class="text-center py-5">
+ *     <h1 class="display-1">404</h1>
+ *     <h2 class="mb-4">Page Not Found</h2>
+ *     <p class="lead">The page you are looking for doesn't exist or has been moved.</p>
+ *     <div class="mt-4">
+ *         <a href="{{ url_for('index') }}" class="btn btn-primary">Go to Homepage</a>
+ *         <a href="javascript:history.back()" class="btn btn-outline-secondary ms-2">Go Back</a>
+ *     </div>
+ * </div>
+ * {% endblock %}
+ * ```
+ */
+
+// Pagination
+/**
+ * Pagination components should:
+ * - Be responsive on all device sizes
+ * - Show current page and total pages
+ * - Include previous and next buttons
+ * - Handle first and last page edge cases
+ * 
+ * Example pagination component:
+ * ```html
+ * {# components/pagination.html #}
+ * {% macro pagination(page, total_pages, endpoint, **kwargs) %}
+ * <nav aria-label="Page navigation">
+ *     <ul class="pagination justify-content-center">
+ *         <li class="page-item {{ 'disabled' if page == 1 else '' }}">
+ *             <a class="page-link" href="{{ url_for(endpoint, page=1, **kwargs) }}" aria-label="First">
+ *                 <span aria-hidden="true">&laquo;&laquo;</span>
+ *             </a>
+ *         </li>
+ *         <li class="page-item {{ 'disabled' if page == 1 else '' }}">
+ *             <a class="page-link" href="{{ url_for(endpoint, page=page-1, **kwargs) }}" aria-label="Previous">
+ *                 <span aria-hidden="true">&laquo;</span>
+ *             </a>
+ *         </li>
+ *         
+ *         {% for p in range(max(1, page-2), min(total_pages+1, page+3)) %}
+ *         <li class="page-item {{ 'active' if p == page else '' }}">
+ *             <a class="page-link" href="{{ url_for(endpoint, page=p, **kwargs) }}">{{ p }}</a>
+ *         </li>
+ *         {% endfor %}
+ *         
+ *         <li class="page-item {{ 'disabled' if page == total_pages else '' }}">
+ *             <a class="page-link" href="{{ url_for(endpoint, page=page+1, **kwargs) }}" aria-label="Next">
+ *                 <span aria-hidden="true">&raquo;</span>
+ *             </a>
+ *         </li>
+ *         <li class="page-item {{ 'disabled' if page == total_pages else '' }}">
+ *             <a class="page-link" href="{{ url_for(endpoint, page=total_pages, **kwargs) }}" aria-label="Last">
+ *                 <span aria-hidden="true">&raquo;&raquo;</span>
+ *             </a>
+ *         </li>
+ *     </ul>
+ * </nav>
+ * {% endmacro %}
+ * ```
+ */
+
+// Timeline Display
+/**
+ * Eviction timeline components should:
+ * - Show clear progression of steps
+ * - Highlight current stage
+ * - Include dates for each step
+ * - Provide detailed information on hover/click
+ * 
+ * Example timeline component:
+ * ```html
+ * {# evictions/timeline.html #}
+ * <div class="eviction-timeline">
+ *     <div class="timeline-container">
+ *         {% for step in timeline %}
+ *         <div class="timeline-step {{ step.status }}">
+ *             <div class="timeline-marker"></div>
+ *             <div class="timeline-content">
+ *                 <h4>{{ step.title }}</h4>
+ *                 <p class="timeline-date">{{ step.date }}</p>
+ *                 <div class="timeline-details">
+ *                     {{ step.details }}
+ *                 </div>
+ *             </div>
+ *         </div>
+ *         {% endfor %}
+ *     </div>
+ * </div>
+ * ```
+ */
+
+// Dashboard Components
+/**
+ * Dashboard components should:
+ * - Present key metrics in a visually appealing way
+ * - Use charts and graphs for data visualization
+ * - Include filters for customizing data display
+ * - Provide links to detailed views
+ * 
+ * Example dashboard component:
+ * ```html
+ * {# dashboard/index.html #}
+ * <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4 mb-4">
+ *     <div class="col">
+ *         <div class="card h-100">
+ *             <div class="card-body">
+ *                 <h5 class="card-title">Active Evictions</h5>
+ *                 <p class="card-text fs-1">{{ stats.active_evictions }}</p>
+ *                 <p class="card-text text-muted">
+ *                     <span class="{{ 'text-success' if stats.active_evictions_change < 0 else 'text-danger' }}">
+ *                         {{ stats.active_evictions_change }}%
+ *                     </span>
+ *                     from last month
+ *                 </p>
+ *             </div>
+ *             <div class="card-footer">
+ *                 <a href="{{ url_for('evictions.list', status='active') }}" class="btn btn-sm btn-outline-primary">View All</a>
+ *             </div>
+ *         </div>
+ *     </div>
+ *     <!-- Additional metric cards here -->
+ * </div>
+ * 
+ * <div class="row g-4">
+ *     <div class="col-12 col-xl-8">
+ *         <div class="card h-100">
+ *             <div class="card-header d-flex justify-content-between align-items-center">
+ *                 <h5 class="card-title mb-0">Eviction Trends</h5>
+ *                 <div class="btn-group">
+ *                     <button type="button" class="btn btn-sm btn-outline-secondary period-selector" data-period="month">Month</button>
+ *                     <button type="button" class="btn btn-sm btn-outline-secondary period-selector" data-period="quarter">Quarter</button>
+ *                     <button type="button" class="btn btn-sm btn-outline-secondary period-selector active" data-period="year">Year</button>
+ *                 </div>
+ *             </div>
+ *             <div class="card-body">
+ *                 <canvas id="eviction-trends-chart"></canvas>
+ *             </div>
+ *         </div>
+ *     </div>
+ *     <div class="col-12 col-xl-4">
+ *         <div class="card h-100">
+ *             <div class="card-header">
+ *                 <h5 class="card-title mb-0">Eviction Status Distribution</h5>
+ *             </div>
+ *             <div class="card-body">
+ *                 <canvas id="eviction-status-chart"></canvas>
+ *             </div>
+ *         </div>
+ *     </div>
+ * </div>
+ * ```
+ */
+
+// Email Templates
+/**
+ * Email templates should:
+ * - Use a simple, accessible design
+ * - Include both HTML and plain text versions
+ * - Be responsive for mobile email clients
+ * - Include clear calls to action
+ * - Provide unsubscribe options when appropriate
+ * 
+ * Example email template:
+ * ```html
+ * {# emails/notification.html #}
+ * <!DOCTYPE html>
+ * <html>
+ * <head>
+ *     <meta charset="UTF-8">
+ *     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ *     <title>{{ subject }}</title>
+ * </head>
+ * <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+ *     <div style="text-align: center; margin-bottom: 20px;">
+ *         <img src="{{ url_for('static', filename='img/logo-email.png', _external=True) }}" alt="Eviction Management System Logo" style="max-width: 200px;">
+ *     </div>
+ *     
+ *     <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px;">
+ *         <h1 style="color: #0d6efd; margin-top: 0;">{{ title }}</h1>
+ *         
+ *         {{ content }}
+ *         
+ *         {% if action_url and action_text %}
+ *         <div style="text-align: center; margin: 30px 0;">
+ *             <a href="{{ action_url }}" style="background-color: #0d6efd; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">{{ action_text }}</a>
+ *         </div>
+ *         {% endif %}
+ *     </div>
+ *     
+ *     <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #dee2e6; font-size: 12px; color: #6c757d;">
+ *         <p>© {{ year }} Eviction Management System. All rights reserved.</p>
+ *         <p>If you have any questions, please contact us at <a href="mailto:support@evictionmanagement.com" style="color: #0d6efd;">support@evictionmanagement.com</a>.</p>
+ *     </div>
+ * </body>
+ * </html>
+ * ```
+ */
+
+// Template Naming Conventions
+/**
+ * Template files should follow these naming conventions:
+ * - Use lowercase letters
+ * - Use underscores to separate words
+ * - Be descriptive but concise
+ * - Use consistent prefixes for related templates
+ * 
+ * Examples:
+ * - user_profile.html
+ * - eviction_details.html
+ * - property_list.html
+ * - tenant_edit_form.html
+ */
+
+// JavaScript Integration
+/**
+ * When integrating JavaScript with templates:
+ * - Include scripts at the end of the body
+ * - Use data attributes to pass data to JavaScript
+ * - Keep JavaScript minimal in templates
+ * - Use event delegation for dynamically added elements
+ * 
+ * Example:
+ * ```html
+ * <button 
+ *     class="btn btn-primary" 
+ *     data-action="view-timeline" 
+ *     data-eviction-id="{{ eviction.id }}"
+ *     data-eviction-status="{{ eviction.status }}"
+ * >
+ *     View Timeline
+ * </button>
+ * 
+ * {% block extra_js %}
+ * <script>
+ *     document.addEventListener('DOMContentLoaded', function() {
+ *         document.querySelectorAll('[data-action="view-timeline"]').forEach(button => {
+ *             button.addEventListener('click', function() {
+ *                 const evictionId = this.dataset.evictionId;
+ *                 const evictionStatus = this.dataset.evictionStatus;
+ *                 // Handle button click
+ *             });
+ *         });
+ *     });
+ * </script>
+ * {% endblock %}
+ * ```
+ */
+
+// Color System
+/**
+ * Use consistent color variables throughout templates:
+ * - primary: #0d6efd (primary actions, links)
+ * - secondary: #6c757d (secondary actions)
+ * - success: #198754 (success messages, completed statuses)
+ * - danger: #dc3545 (errors, destructive actions)
+ * - warning: #ffc107 (warnings, caution states)
+ * - info: #0dcaf0 (informational messages)
+ * - dark: #212529 (text, headers)
+ * - light: #f8f9fa (backgrounds)
+ * 
+ * Status-specific colors:
+ * - filed: #0dcaf0 (info)
+ * - pending: #ffc107 (warning)
+ * - scheduled: #6f42c1 (purple)
+ * - judgment: #fd7e14 (orange)
+ * - eviction: #dc3545 (danger)
+ * - completed: #198754 (success)
+ * - dismissed: #6c757d (secondary)
+ */
+
+// Accessibility Requirements
+/**
+ * All templates must adhere to these accessibility guidelines:
+ * - Use semantic HTML elements
+ * - Include proper ARIA attributes
+ * - Maintain sufficient color contrast
+ * - Ensure keyboard navigability
+ * - Provide text alternatives for images
+ * - Use descriptive link text
+ * 
+ * Example:
+ * ```html
+ * <!-- Bad -->
+ * <div class="header">Main Navigation</div>
+ * <div class="nav-item">
+ *     <div class="nav-link" onclick="goToPage('dashboard')">Dashboard</div>
+ * </div>
+ * 
+ * <!-- Good -->
+ * <nav aria-label="Main Navigation">
+ *     <ul class="nav">
+ *         <li class="nav-item">
+ *             <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+ *         </li>
+ *     </ul>
+ * </nav>
+ * ```
+ */
+
+// Responsive Design
+/**
+ * Templates should follow these responsive design principles:
+ * - Use Bootstrap's grid system for layouts
+ * - Test on multiple device sizes
+ * - Use appropriate breakpoints
+ * - Optimize tables for mobile viewing
+ * - Consider touch interfaces for interactive elements
+ * 
+ * Example:
+ * ```html
+ * <div class="row">
+ *     <div class="col-12 col-md-6 col-lg-4">
+ *         <!-- Content adapted for different screen sizes -->
+ *     </div>
+ * </div>
+ * ```
+ */ 

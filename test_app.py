@@ -1,0 +1,95 @@
+import os
+from simplified_app import app, load_evictions, EVICTIONS_DB, save_evictions
+
+def create_sample_data_without_flash():
+    """Create sample data without using flash messages"""
+    global EVICTIONS_DB
+    
+    # Create some sample evictions
+    EVICTIONS_DB = [
+        {
+            'id': '1682485763',
+            'case_number': 'EV-2025-001',
+            'tenant_name': 'John Smith',
+            'property_address': '123 Main St, Apt 4B, Cityville, ST 12345',
+            'filing_date': '2025-03-15',
+            'status': 'pending',
+            'judgment_amount': 3200.00,
+            'court_date': '2025-04-01',
+            'writ_date': None,
+            'days_to_eviction': 35
+        },
+        {
+            'id': '1682485764',
+            'case_number': 'EV-2025-002',
+            'tenant_name': 'Jane Doe',
+            'property_address': '456 Oak Ave, Unit 7, Townburg, ST 54321',
+            'filing_date': '2025-02-10',
+            'status': 'judgment',
+            'judgment_amount': 4500.00,
+            'court_date': '2025-02-28',
+            'judgment_date': '2025-03-01',
+            'writ_date': None,
+            'days_to_eviction': 22
+        },
+        {
+            'id': '1682485765',
+            'case_number': 'EV-2025-003',
+            'tenant_name': 'Michael Johnson',
+            'property_address': '789 Pine Rd, Villageton, ST 67890',
+            'filing_date': '2025-01-05',
+            'status': 'writ',
+            'judgment_amount': 2800.00,
+            'court_date': '2025-01-20',
+            'judgment_date': '2025-01-22',
+            'writ_date': '2025-01-29',
+            'days_to_eviction': 7
+        },
+        {
+            'id': '1682485766',
+            'case_number': 'EV-2025-004',
+            'tenant_name': 'Emily Brown',
+            'property_address': '321 Elm St, Hamlet, ST 13579',
+            'filing_date': '2024-12-12',
+            'status': 'completed',
+            'judgment_amount': 3700.00,
+            'court_date': '2024-12-28',
+            'judgment_date': '2024-12-30',
+            'writ_date': '2025-01-06',
+            'eviction_date': '2025-01-13',
+            'days_to_eviction': 0
+        },
+        {
+            'id': '1682485767',
+            'case_number': 'EV-2025-005',
+            'tenant_name': 'Robert Wilson',
+            'property_address': '555 Maple Ave, Boroughville, ST 24680',
+            'filing_date': '2025-03-20',
+            'status': 'active',
+            'judgment_amount': None,
+            'court_date': '2025-04-05',
+            'days_to_eviction': 40
+        }
+    ]
+    
+    save_evictions()
+    print("Sample data created successfully!")
+
+if __name__ == '__main__':
+    # Create required directories
+    os.makedirs('templates', exist_ok=True)
+    os.makedirs('reports', exist_ok=True)
+    os.makedirs('eviction_data', exist_ok=True)
+    
+    # Create sample data if no evictions exist
+    load_evictions()
+    if not EVICTIONS_DB:
+        create_sample_data_without_flash()
+        print("Created sample eviction data")
+    else:
+        print(f"Loaded {len(EVICTIONS_DB)} existing eviction records")
+    
+    # Run the app
+    print("Starting Eviction Management System...")
+    print("Access the application at http://localhost:5000")
+    app.run(debug=True, host='0.0.0.0', port=5000) 

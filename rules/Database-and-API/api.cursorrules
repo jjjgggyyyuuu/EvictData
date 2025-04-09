@@ -1,0 +1,543 @@
+# API Rules
+
+## API Design Principles
+- Use RESTful conventions
+- Version all endpoints
+- Use proper HTTP methods
+- Return appropriate status codes
+- Implement rate limiting
+- Document all endpoints
+
+## Authentication
+- Use JWT tokens
+- Implement refresh tokens
+- Secure password storage
+- Role-based access control
+- API key management
+- Session handling
+
+## Endpoints
+
+### Properties
+```
+GET /api/v1/properties
+POST /api/v1/properties
+GET /api/v1/properties/{id}
+PUT /api/v1/properties/{id}
+DELETE /api/v1/properties/{id}
+GET /api/v1/properties/{id}/tenants
+GET /api/v1/properties/{id}/evictions
+```
+
+### Tenants
+```
+GET /api/v1/tenants
+POST /api/v1/tenants
+GET /api/v1/tenants/{id}
+PUT /api/v1/tenants/{id}
+DELETE /api/v1/tenants/{id}
+GET /api/v1/tenants/{id}/leases
+GET /api/v1/tenants/{id}/evictions
+```
+
+### Leases
+```
+GET /api/v1/leases
+POST /api/v1/leases
+GET /api/v1/leases/{id}
+PUT /api/v1/leases/{id}
+DELETE /api/v1/leases/{id}
+GET /api/v1/leases/{id}/documents
+```
+
+### Evictions
+```
+GET /api/v1/evictions
+POST /api/v1/evictions
+GET /api/v1/evictions/{id}
+PUT /api/v1/evictions/{id}
+DELETE /api/v1/evictions/{id}
+GET /api/v1/evictions/{id}/documents
+POST /api/v1/evictions/{id}/documents
+GET /api/v1/evictions/reports
+```
+
+### Reports
+```
+GET /api/v1/reports/evictions
+GET /api/v1/reports/properties
+GET /api/v1/reports/tenants
+GET /api/v1/reports/analytics
+```
+
+## Response Format
+```json
+{
+    "success": true,
+    "data": {},
+    "message": "",
+    "errors": [],
+    "meta": {
+        "page": 1,
+        "per_page": 20,
+        "total": 100
+    }
+}
+```
+
+## Error Handling
+- Use consistent error format
+- Include error codes
+- Provide helpful messages
+- Log all errors
+- Handle validation errors
+
+## Security
+- Input validation
+- Output sanitization
+- CORS configuration
+- XSS prevention
+- CSRF protection
+- SQL injection prevention
+
+## Performance
+- Implement caching
+- Optimize queries
+- Use pagination
+- Compress responses
+- Monitor response times
+
+## Documentation
+- Use OpenAPI/Swagger
+- Include examples
+- Document error codes
+- Provide authentication details
+- Include rate limits
+
+## Testing
+- Unit tests
+- Integration tests
+- Load testing
+- Security testing
+- API documentation tests
+
+## Monitoring
+- Track API usage
+- Monitor errors
+- Performance metrics
+- Alert on issues
+- User analytics
+
+## Versioning
+- Semantic versioning
+- Version in URL
+- Deprecation notices
+- Backward compatibility
+- Migration guides 
+
+# API Rules for Eviction Management System
+
+## Authentication and Authorization
+
+### JWT Configuration
+```typescript
+interface JWTConfig {
+  secret: string;
+  expiresIn: '24h';
+  refreshExpiresIn: '7d';
+  algorithm: 'HS256';
+}
+
+interface TokenPayload {
+  userId: string;
+  role: 'admin' | 'landlord' | 'tenant';
+  permissions: string[];
+}
+```
+
+### Rate Limiting
+```typescript
+const rateLimits = {
+  standard: {
+    authenticated: { windowMs: 60 * 1000, max: 100 },
+    unauthenticated: { windowMs: 60 * 1000, max: 20 }
+  },
+  sensitive: {
+    authenticated: { windowMs: 60 * 1000, max: 30 },
+    unauthenticated: { windowMs: 60 * 1000, max: 5 }
+  }
+};
+```
+
+### CORS Configuration
+```typescript
+const corsConfig = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://evictionmanagement.com', 'https://api.evictionmanagement.com'] 
+    : '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true
+};
+```
+
+## Request/Response Standards
+
+### Request Validation
+```typescript
+// Request validation middleware
+const requestValidation = (schema) => {
+  return (req, res, next) => {
+    const { error } = schema.validate({
+      params: req.params,
+      body: req.body,
+      query: req.query
+    });
+    
+    if (error) {
+      return res.status(400).json({
+        status: 'error',
+        message: error.details[0].message,
+        code: 'VALIDATION_ERROR'
+      });
+    }
+    
+    next();
+  };
+};
+```
+
+### Response Format
+```typescript
+interface APIResponse<T> {
+  status: 'success' | 'error';
+  message?: string;
+  data?: T;
+  meta?: {
+    page: number;
+    perPage: number;
+    total: number;
+    totalPages: number;
+  };
+  errors?: {
+    field: string;
+    message: string;
+  }[];
+}
+```
+
+### Pagination
+```typescript
+interface PaginationParams {
+  page?: number;
+  perPage?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+const defaultPagination: PaginationParams = {
+  page: 1,
+  perPage: 10,
+  sortBy: 'created_at',
+  sortOrder: 'desc'
+};
+```
+
+## Error Handling
+
+### Error Types
+```typescript
+class APIError extends Error {
+  constructor(
+    message: string,
+    public statusCode: number,
+    public code: string
+  ) {
+    super(message);
+  }
+}
+
+class ValidationError extends APIError {
+  constructor(message: string) {
+    super(message, 400, 'VALIDATION_ERROR');
+  }
+}
+
+class AuthenticationError extends APIError {
+  constructor(message: string) {
+    super(message, 401, 'AUTHENTICATION_ERROR');
+  }
+}
+
+class AuthorizationError extends APIError {
+  constructor(message: string) {
+    super(message, 403, 'AUTHORIZATION_ERROR');
+  }
+}
+
+class NotFoundError extends APIError {
+  constructor(message: string) {
+    super(message, 404, 'NOT_FOUND_ERROR');
+  }
+}
+```
+
+### Error Middleware
+```typescript
+const errorHandler = (
+  error: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (error instanceof APIError) {
+    return res.status(error.statusCode).json({
+      status: 'error',
+      message: error.message,
+      code: error.code
+    });
+  }
+
+  // Log unexpected errors
+  console.error(error);
+  
+  return res.status(500).json({
+    status: 'error',
+    message: 'Internal server error',
+    code: 'INTERNAL_SERVER_ERROR'
+  });
+};
+```
+
+## Security
+
+### Headers
+```typescript
+const securityHeaders = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'X-XSS-Protection': '1; mode=block',
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+  'Content-Security-Policy': "default-src 'self'",
+  'Referrer-Policy': 'strict-origin-when-cross-origin'
+};
+```
+
+### Input Sanitization
+```typescript
+const sanitizeInput = (input: string): string => {
+  return input
+    .replace(/[<>]/g, '') // Remove HTML tags
+    .trim() // Remove whitespace
+    .slice(0, 1000); // Limit length
+};
+
+const sanitizeObject = (obj: Record<string, any>): Record<string, any> => {
+  return Object.entries(obj).reduce((acc, [key, value]) => {
+    if (typeof value === 'string') {
+      acc[key] = sanitizeInput(value);
+    } else {
+      acc[key] = value;
+    }
+    return acc;
+  }, {});
+};
+```
+
+## Caching
+
+### Cache Configuration
+```typescript
+interface CacheConfig {
+  driver: 'redis' | 'memory';
+  ttl: number; // seconds
+  maxSize: number; // entries
+}
+
+const cacheRules = {
+  // Cache GET requests
+  'GET /api/properties': {
+    ttl: 300, // 5 minutes
+    key: (req) => `properties:${req.query.page}:${req.query.perPage}`
+  },
+  
+  // Cache user permissions
+  'GET /api/users/:id/permissions': {
+    ttl: 3600, // 1 hour
+    key: (req) => `permissions:${req.params.id}`
+  }
+};
+```
+
+## Logging
+
+### Log Format
+```typescript
+interface APILog {
+  timestamp: string;
+  level: 'info' | 'warn' | 'error';
+  method: string;
+  path: string;
+  status: number;
+  responseTime: number;
+  userId?: string;
+  ip: string;
+  userAgent: string;
+  error?: Error;
+}
+
+const logFormat = {
+  timestamp: true,
+  colorize: false,
+  json: true,
+  requestId: true
+};
+```
+
+## Documentation
+
+### OpenAPI/Swagger Configuration
+```typescript
+const swaggerConfig = {
+  openapi: '3.0.0',
+  info: {
+    title: 'Eviction Management System API',
+    version: '1.0.0',
+    description: 'API documentation for the Eviction Management System'
+  },
+  servers: [
+    {
+      url: 'https://api.evictionmanagement.com/v1',
+      description: 'Production server'
+    }
+  ],
+  security: [
+    {
+      bearerAuth: []
+    }
+  ]
+};
+```
+
+## Versioning
+
+### Version Control
+```typescript
+interface VersionConfig {
+  current: 'v1';
+  supported: ['v1'];
+  deprecated: [];
+  sunset: {
+    'v1': null
+  };
+}
+
+const versionMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  const version = req.headers['api-version'] || 'v1';
+  if (!config.supported.includes(version)) {
+    return next(new APIError('Unsupported API version', 400, 'VERSION_ERROR'));
+  }
+  next();
+};
+```
+
+## Performance
+
+### Compression
+```typescript
+const compressionConfig = {
+  level: 6,
+  threshold: 1024, // bytes
+  filter: (req: Request, res: Response) => {
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  }
+};
+```
+
+### Request Timeout
+```typescript
+const timeoutConfig = {
+  // Global timeout
+  server: {
+    timeout: 30000 // 30 seconds
+  },
+  
+  // Route-specific timeouts
+  routes: {
+    'POST /api/documents/upload': 120000, // 2 minutes
+    'GET /api/reports/generate': 60000 // 1 minute
+  }
+};
+```
+
+## Testing
+
+### Test Configuration
+```typescript
+interface TestConfig {
+  environment: 'test';
+  database: {
+    useTestDB: true,
+    seedData: boolean;
+  };
+  auth: {
+    useTestTokens: true;
+    mockUsers: {
+      admin: { id: 'test-admin', role: 'admin' };
+      landlord: { id: 'test-landlord', role: 'landlord' };
+      tenant: { id: 'test-tenant', role: 'tenant' };
+    };
+  };
+}
+```
+
+## Monitoring
+
+### Health Check
+```typescript
+interface HealthCheck {
+  status: 'up' | 'down';
+  uptime: number;
+  timestamp: string;
+  services: {
+    database: {
+      status: 'up' | 'down';
+      responseTime: number;
+    };
+    cache: {
+      status: 'up' | 'down';
+      responseTime: number;
+    };
+    storage: {
+      status: 'up' | 'down';
+      responseTime: number;
+    };
+  };
+}
+```
+
+### Metrics
+```typescript
+interface APIMetrics {
+  requests: {
+    total: number;
+    success: number;
+    error: number;
+    avgResponseTime: number;
+  };
+  endpoints: {
+    [path: string]: {
+      hits: number;
+      avgResponseTime: number;
+      errorRate: number;
+    };
+  };
+  users: {
+    active: number;
+    new: number;
+  };
+}
+``` 

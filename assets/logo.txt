@@ -1,0 +1,12 @@
+Eviction Management System Logo
+------------------------------
+This is a placeholder for the project logo.
+The actual logo should be a PNG file named logo.png in this directory.
+
+Logo Guidelines:
+- Use a professional design
+- Include a house/building icon
+- Use blue and gray as primary colors
+- Include text "Eviction Management System"
+- Keep it simple and recognizable
+- Ensure it works well in both light and dark backgrounds 

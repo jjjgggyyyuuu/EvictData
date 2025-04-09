@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}My Account - Eviction Timeline Calculator{% endblock %}
+
+{% block additional_styles %}
+<style>
+    .account-container {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+    .subscription-card {
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .subscription-card.active {
+        background-color: #f0fff4;
+        border-left: 5px solid #198754;
+    }
+    .subscription-card.inactive {
+        background-color: #fff8f8;
+        border-left: 5px solid #dc3545;
+    }
+    .days-remaining {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    .payment-history-item {
+        border-bottom: 1px solid #e0e0e0;
+        padding: 1rem 0;
+    }
+    .payment-history-item:last-child {
+        border-bottom: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="account-container">
+                <h1 class="mb-4">My Account</h1>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="subscription-card {% if subscription.has_subscription %}active{% else %}inactive{% endif %}">
+                            <h3>Subscription Status</h3>
+                            
+                            {% if subscription.has_subscription %}
+                                <div class="alert alert-success">
+                                    <strong>Active Subscription</strong>
+                                </div>
+                                <p><strong>Type:</strong> Standard Access</p>
+                                <p><strong>Start Date:</strong> {{ subscription.start_date }}</p>
+                                <p><strong>Expiry Date:</strong> {{ subscription.end_date }}</p>
+                                <p class="mb-0"><strong>Days Remaining:</strong> <span class="days-remaining text-success">{{ subscription.days_remaining }}</span></p>
+                            {% else %}
+                                <div class="alert alert-danger">
+                                    <strong>No Active Subscription</strong>
+                                </div>
+                                <p>You currently don't have an active subscription. Purchase a subscription to access all features.</p>
+                                <a href="{{ url_for('subscribe') }}" class="btn btn-primary">Subscribe Now</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Account Information</h3>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Username:</strong> {{ user.username }}</p>
+                                <p><strong>Email:</strong> {{ user.email }}</p>
+                                <p><strong>Member Since:</strong> {{ user.created_at.strftime('%Y-%m-%d') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <h3>Payment History</h3>
+                    
+                    {% if payment_history %}
+                        <div class="payment-history">
+                            {% for payment in payment_history %}
+                                <div class="payment-history-item">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <p class="mb-0"><strong>Date:</strong> {{ payment.payment_date.strftime('%Y-%m-%d') }}</p>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <p class="mb-0"><strong>Amount:</strong> ${{ payment.amount }}</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="mb-0"><strong>Transaction ID:</strong> <small class="text-muted">{{ payment.stripe_payment_id }}</small></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p>No payment history found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

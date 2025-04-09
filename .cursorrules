@@ -1,0 +1,44 @@
+Cursor Rules
+
+This repository contains a collection of .cursorrules files for use with Cursor AI.
+
+# Project Structure
+- The 'rules' directory contains categorized .cursorrules examples
+- Each .cursorrules file is focused on a specific technology or framework
+- The README.md contains the full catalog of available rules
+
+# Coding Conventions
+- Use consistent naming conventions
+- Include helpful comments for complex logic
+
+# Common Libraries and Tools
+- List frequently used libraries and dependencies here
+- Include preferred versions when applicable
+
+# Style Guidelines
+- Maintain consistent formatting
+- Follow established patterns in existing code
+- Use appropriate error handling
+
+// place most important folders at the top of the list
+// make this appealing to both landlords and tenants
+// make it easy to understand and navigate 
+// include reports people can pull to see how many evictions have been filed 
+// reports should include the date, the tenant, the property, and the amount of the judgement 
+// reports should be color coded to show the status of the judgement 
+// reports should be easy to understand and navigate 
+// reports should be easy to print and share 
+// reports should be easy to email to the tenant and the landlord 
+// reports should be easy to email to the tenant and the landlord 
+// make the SEO very good and include all the right keywords 
+// make it valuable for landlords and tenants
+// i want to make a lot of money with this website 
+
+//Include a readme.md file that explains the project and how to use it 
+//Include a license file 
+//Include a contributing.md file 
+//Include a code of conduct.md file 
+//Include a privacy policy.md file 
+//Include a terms of service.md file 
+
+

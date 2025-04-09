@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+
+{% block title %}Eviction Timeline Results{% endblock %}
+
+{% block styles %}
+<style>
+    .result-container {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        border-left: 5px solid #0d6efd;
+    }
+    .urgent {
+        border-left: 5px solid #dc3545;
+        background-color: #fff8f8;
+    }
+    .warning {
+        border-left: 5px solid #ffc107;
+        background-color: #fffbf0;
+    }
+    .safe {
+        border-left: 5px solid #198754;
+        background-color: #f0fff4;
+    }
+    .timeline-step {
+        position: relative;
+        padding-left: 30px;
+        margin-bottom: 15px;
+    }
+    .timeline-step:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: #0d6efd;
+    }
+    .timeline-step:after {
+        content: '';
+        position: absolute;
+        left: 9px;
+        top: 20px;
+        width: 2px;
+        height: calc(100% - 10px);
+        background-color: #0d6efd;
+    }
+    .timeline-step:last-child:after {
+        display: none;
+    }
+    .days-remaining {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    .disclaimer {
+        background-color: #fff3cd;
+        border-left: 5px solid #ffc107;
+        padding: 1rem;
+        border-radius: 5px;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-4 mb-4">Eviction Timeline Results</h1>
+    
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Calculated Timeline</h5>
+        </div>
+        <div class="card-body">
+            <div class="disclaimer mb-4">
+                <strong><i class="fas fa-exclamation-triangle me-2"></i>Important Disclaimer:</strong> 
+                This calculator provides estimates based on average timelines. Actual eviction processes can vary significantly depending on court schedules, legal actions, and other factors. This is not legal advice. Please consult with a legal professional for specific guidance.
+            </div>
+            
+            {% if result.days_to_eviction is defined %}
+                {% if result.days_to_eviction <= 7 %}
+                    <div class="result-container urgent">
+                        <h3>Urgent: Eviction Imminent</h3>
+                        <p class="days-remaining text-danger">{{ result.days_to_eviction }} days remaining</p>
+                        <p>Based on your input, the eviction process is in its final stages. Immediate action is recommended.</p>
+                    </div>
+                {% elif result.days_to_eviction <= 30 %}
+                    <div class="result-container warning">
+                        <h3>Warning: Eviction Approaching</h3>
+                        <p class="days-remaining text-warning">{{ result.days_to_eviction }} days remaining</p>
+                        <p>The eviction timeline is progressing. Consider taking action soon to prepare or resolve the situation.</p>
+                    </div>
+                {% else %}
+                    <div class="result-container safe">
+                        <h3>Notice: Eviction Timeline</h3>
+                        <p class="days-remaining text-success">{{ result.days_to_eviction }} days remaining</p>
+                        <p>There is still time to address the situation before the eviction process completes.</p>
+                    </div>
+                {% endif %}
+            {% endif %}
+            
+            <h3 class="mt-4">Timeline Details</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <ul class="list-group mb-3">
+                        {% if result.filing_date %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Filing Date
+                            <span class="badge bg-primary rounded-pill">{{ result.filing_date }}</span>
+                        </li>
+                        {% endif %}
+                        
+                        {% if result.service_date %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Service Date
+                            <span class="badge bg-primary rounded-pill">{{ result.service_date }}</span>
+                        </li>
+                        {% endif %}
+                        
+                        {% if result.court_date %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Court Date
+                            <span class="badge bg-primary rounded-pill">{{ result.court_date }}</span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul class="list-group mb-3">
+                        {% if result.judgment_date %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Judgment Date
+                            <span class="badge bg-primary rounded-pill">{{ result.judgment_date }}</span>
+                        </li>
+                        {% endif %}
+                        
+                        {% if result.writ_date %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Writ of Possession Date
+                            <span class="badge bg-primary rounded-pill">{{ result.writ_date }}</span>
+                        </li>
+                        {% endif %}
+                        
+                        {% if result.eviction_date %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Eviction Date
+                            <span class="badge bg-danger rounded-pill">{{ result.eviction_date }}</span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            
+            <h3 class="mt-4">Visual Timeline</h3>
+            <div class="p-3 bg-light rounded">
+                {% if result.filing_date %}
+                <div class="timeline-step">
+                    <h5>Filing Date: {{ result.filing_date }}</h5>
+                    <p>Eviction case filed with the court</p>
+                </div>
+                {% endif %}
+                
+                {% if result.service_date %}
+                <div class="timeline-step">
+                    <h5>Service Date: {{ result.service_date }}</h5>
+                    <p>Tenant served with eviction notice</p>
+                </div>
+                {% endif %}
+                
+                {% if result.court_date %}
+                <div class="timeline-step">
+                    <h5>Court Date: {{ result.court_date }}</h5>
+                    <p>Court hearing for the eviction case</p>
+                </div>
+                {% endif %}
+                
+                {% if result.judgment_date %}
+                <div class="timeline-step">
+                    <h5>Judgment Date: {{ result.judgment_date }}</h5>
+                    <p>Court issues judgment on the eviction case</p>
+                </div>
+                {% endif %}
+                
+                {% if result.writ_date %}
+                <div class="timeline-step">
+                    <h5>Writ of Possession: {{ result.writ_date }}</h5>
+                    <p>Court issues writ of possession</p>
+                </div>
+                {% endif %}
+                
+                {% if result.eviction_date %}
+                <div class="timeline-step">
+                    <h5>Eviction Date: {{ result.eviction_date }}</h5>
+                    <p>Date when physical eviction may occur</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                <a href="{{ url_for('timeline_calculator') }}" class="btn btn-secondary me-md-2">New Calculation</a>
+                <button class="btn btn-primary" onclick="window.print()">Print Results</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

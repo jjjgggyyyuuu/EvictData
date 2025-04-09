@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+
+{% block title %}Eviction Details - {{ eviction.case_number }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb" class="mt-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('evictions') }}">Evictions</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ eviction.case_number }}</li>
+        </ol>
+    </nav>
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Eviction Details</h1>
+        <div>
+            <button type="button" class="btn btn-outline-primary me-2" onclick="window.print()">
+                <i class="fas fa-print me-2"></i>Print
+            </button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateStatusModal">
+                <i class="fas fa-edit me-2"></i>Update Status
+            </button>
+        </div>
+    </div>
+    
+    <!-- Status Alert -->
+    {% if eviction.status == 'pending' %}
+    <div class="alert alert-warning">
+        <i class="fas fa-hourglass-half me-2"></i>This eviction case is pending and awaiting further action.
+    </div>
+    {% elif eviction.status == 'active' %}
+    <div class="alert alert-info">
+        <i class="fas fa-sync me-2"></i>This eviction case is currently active in the court system.
+    </div>
+    {% elif eviction.status == 'judgment' %}
+    <div class="alert alert-primary">
+        <i class="fas fa-gavel me-2"></i>A judgment has been issued for this eviction case.
+    </div>
+    {% elif eviction.status == 'writ' %}
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle me-2"></i>A writ of possession has been issued for this eviction case.
+    </div>
+    {% elif eviction.status == 'completed' %}
+    <div class="alert alert-success">
+        <i class="fas fa-check-circle me-2"></i>This eviction case has been completed.
+    </div>
+    {% elif eviction.status == 'cancelled' %}
+    <div class="alert alert-secondary">
+        <i class="fas fa-ban me-2"></i>This eviction case has been cancelled.
+    </div>
+    {% endif %}
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <div class="row">
+        <!-- Case Information -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Case Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Case Number:</strong> {{ eviction.case_number }}</p>
+                            <p><strong>Case Description:</strong> {{ eviction.case_description }}</p>
+                            <p><strong>Filing Date:</strong> {{ eviction.filing_date }}</p>
+                            <p><strong>Filing Code:</strong> {{ eviction.filing_code }}</p>
+                            <p><strong>Document Name:</strong> {{ eviction.document_name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Status:</strong> <span class="badge status-{{ eviction.status }}">{{ eviction.status }}</span></p>
+                            <p><strong>Status Updated:</strong> {{ eviction.status_updated }}</p>
+                            <p><strong>Judgment Date:</strong> {{ eviction.judgment_date }}</p>
+                            <p><strong>Writ Date:</strong> {{ eviction.writ_date }}</p>
+                            <p><strong>Estimated Eviction Date:</strong> {{ eviction.eviction_date }}</p>
+                        </div>
+                    </div>
+                    {% if eviction.content_text %}
+                    <div class="mt-3">
+                        <h6>Document Content:</h6>
+                        <div class="bg-light p-3 rounded">
+                            {{ eviction.content_text }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Parties Information -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-users me-2"></i>Parties</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Tenant Information</h6>
+                            <p><strong>Name:</strong> {{ eviction.tenant_name }}</p>
+                            <p><strong>Phone:</strong> {{ eviction.tenant_phone }}</p>
+                            <p><strong>Email:</strong> {{ eviction.tenant_email }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Landlord Information</h6>
+                            <p><strong>Name:</strong> {{ eviction.landlord_name }}</p>
+                            <p><strong>Company:</strong> {{ eviction.landlord_company }}</p>
+                            <p><strong>Contact:</strong> {{ eviction.landlord_contact }}</p>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <h6>Property Information</h6>
+                        <p><strong>Address:</strong> {{ eviction.property_address }}</p>
+                        <p><strong>Type:</strong> {{ eviction.property_type }}</p>
+                        <p><strong>Unit:</strong> {{ eviction.property_unit }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Financial Information -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-dollar-sign me-2"></i>Financial Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Judgment Details</h6>
+                            <p><strong>Judgment Amount:</strong> {% if eviction.judgment_amount %}${{ eviction.judgment_amount }}{% else %}Not Available{% endif %}</p>
+                            <p><strong>Back Rent:</strong> {% if eviction.back_rent %}${{ eviction.back_rent }}{% else %}Not Available{% endif %}</p>
+                            <p><strong>Court Costs:</strong> {% if eviction.court_costs %}${{ eviction.court_costs }}{% else %}Not Available{% endif %}</p>
+                            <p><strong>Late Fees:</strong> {% if eviction.late_fees %}${{ eviction.late_fees }}{% else %}Not Available{% endif %}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Payment Information</h6>
+                            <p><strong>Payment Status:</strong> {% if eviction.payment_status %}{{ eviction.payment_status }}{% else %}Not Available{% endif %}</p>
+                            <p><strong>Payment Date:</strong> {% if eviction.payment_date %}{{ eviction.payment_date }}{% else %}Not Available{% endif %}</p>
+                            <p><strong>Payment Amount:</strong> {% if eviction.payment_amount %}${{ eviction.payment_amount }}{% else %}Not Available{% endif %}</p>
+                            <p><strong>Balance Due:</strong> {% if eviction.balance_due %}${{ eviction.balance_due }}{% else %}Not Available{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Timeline Widget -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Timeline</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% if eviction.filing_date %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-file-alt me-2 text-primary"></i>Filing
+                                <div class="text-muted small">{{ eviction.filing_date }}</div>
+                            </div>
+                            <span class="badge bg-success rounded-pill">Completed</span>
+                        </li>
+                        {% endif %}
+                        
+                        {% if eviction.service_date %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-envelope me-2 text-info"></i>Service
+                                <div class="text-muted small">{{ eviction.service_date }}</div>
+                            </div>
+                            <span class="badge bg-success rounded-pill">Completed</span>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-envelope me-2 text-secondary"></i>Service
+                                <div class="text-muted small">Estimated: {{ eviction.filing_date | default('N/A') }}</div>
+                            </div>
+                            <span class="badge bg-secondary rounded-pill">Pending</span>
+                        </li>
+                        {% endif %}
+                        
+                        {% if eviction.court_date %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-gavel me-2 text-warning"></i>Court Date
+                                <div class="text-muted small">{{ eviction.court_date }}</div>
+                            </div>
+                            <span class="badge bg-success rounded-pill">Completed</span>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-gavel me-2 text-secondary"></i>Court Date
+                                <div class="text-muted small">Not Scheduled</div>
+                            </div>
+                            <span class="badge bg-secondary rounded-pill">Pending</span>
+                        </li>
+                        {% endif %}
+                        
+                        {% if eviction.judgment_date %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-balance-scale me-2 text-danger"></i>Judgment
+                                <div class="text-muted small">{{ eviction.judgment_date }}</div>
+                            </div>
+                            <span class="badge bg-success rounded-pill">Completed</span>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-balance-scale me-2 text-secondary"></i>Judgment
+                                <div class="text-muted small">Pending</div>
+                            </div>
+                            <span class="badge bg-secondary rounded-pill">Pending</span>
+                        </li>
+                        {% endif %}
+                        
+                        {% if eviction.writ_date %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-file-contract me-2 text-info"></i>Writ of Possession
+                                <div class="text-muted small">{{ eviction.writ_date }}</div>
+                            </div>
+                            <span class="badge bg-success rounded-pill">Completed</span>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-file-contract me-2 text-secondary"></i>Writ of Possession
+                                <div class="text-muted small">Pending</div>
+                            </div>
+                            <span class="badge bg-secondary rounded-pill">Pending</span>
+                        </li>
+                        {% endif %}
+                        
+                        {% if eviction.status == 'completed' %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-door-open me-2 text-success"></i>Eviction Executed
+                                <div class="text-muted small">{{ eviction.eviction_date }}</div>
+                            </div>
+                            <span class="badge bg-success rounded-pill">Completed</span>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-door-open me-2 text-secondary"></i>Eviction
+                                <div class="text-muted small">Estimated: {{ eviction.eviction_date }}</div>
+                            </div>
+                            <span class="badge bg-secondary rounded-pill">Pending</span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Actions Widget -->
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Actions</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-edit me-2 text-primary"></i>Update Status
+                            </div>
+                            <i class="fas fa-chevron-right text-muted"></i>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-envelope me-2 text-info"></i>Send Email to Tenant
+                            </div>
+                            <i class="fas fa-chevron-right text-muted"></i>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-file-pdf me-2 text-danger"></i>Generate PDF Report
+                            </div>
+                            <i class="fas fa-chevron-right text-muted"></i>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-chart-line me-2 text-success"></i>View Timeline
+                            </div>
+                            <i class="fas fa-chevron-right text-muted"></i>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-print me-2 text-secondary"></i>Print Details
+                            </div>
+                            <i class="fas fa-chevron-right text-muted"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Import Information Widget -->
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-file-import me-2"></i>Import Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Import Date:</strong> {{ eviction.import_date }}</p>
+                    <p><strong>Source File:</strong> {{ eviction.source_file }}</p>
+                    <p><strong>Last Updated:</strong> {{ eviction.last_updated }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Update Status Modal -->
+    <div class="modal fade" id="updateStatusModal" tabindex="-1" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateStatusModalLabel">Update Eviction Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ url_for('update_eviction', eviction_id=eviction.id) }}" method="post">
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="pending" {% if eviction.status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="active" {% if eviction.status == 'active' %}selected{% endif %}>Active</option>
+                                <option value="judgment" {% if eviction.status == 'judgment' %}selected{% endif %}>Judgment</option>
+                                <option value="writ" {% if eviction.status == 'writ' %}selected{% endif %}>Writ Issued</option>
+                                <option value="completed" {% if eviction.status == 'completed' %}selected{% endif %}>Completed</option>
+                                <option value="cancelled" {% if eviction.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="court_date" class="form-label">Court Date</label>
+                            <input type="date" class="form-control" id="court_date" name="court_date" value="{{ eviction.court_date }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="judgment_date" class="form-label">Judgment Date</label>
+                            <input type="date" class="form-control" id="judgment_date" name="judgment_date" value="{{ eviction.judgment_date }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="writ_date" class="form-label">Writ of Possession Date</label>
+                            <input type="date" class="form-control" id="writ_date" name="writ_date" value="{{ eviction.writ_date }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="judgment_amount" class="form-label">Judgment Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="judgment_amount" name="judgment_amount" step="0.01" value="{{ eviction.judgment_amount }}">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3">{{ eviction.notes }}</textarea>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Update Status</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

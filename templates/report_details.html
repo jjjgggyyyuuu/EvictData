@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+
+{% block title %}Report Details{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb" class="mt-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('reports') }}">Reports</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ filename }}</li>
+        </ol>
+    </nav>
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Report Details</h1>
+        <div>
+            <button type="button" class="btn btn-outline-primary me-2" onclick="window.print()">
+                <i class="fas fa-print me-2"></i>Print
+            </button>
+            <button type="button" class="btn btn-outline-info me-2">
+                <i class="fas fa-envelope me-2"></i>Email
+            </button>
+            <a href="#" class="btn btn-primary">
+                <i class="fas fa-download me-2"></i>Download
+            </a>
+        </div>
+    </div>
+    
+    <!-- Report Info -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Report Information</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Filename:</strong> {{ filename }}</p>
+                    <p><strong>Generated:</strong> {{ report.timestamp }}</p>
+                    <p><strong>Records:</strong> {{ report.count if report.count is defined else report.records_imported }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Type:</strong>
+                        {% if filename.endswith('.json') %}
+                        <span class="badge bg-info">JSON</span>
+                        {% elif filename.endswith('.md') %}
+                        <span class="badge bg-success">Markdown</span>
+                        {% elif filename.endswith('.pdf') %}
+                        <span class="badge bg-danger">PDF</span>
+                        {% elif filename.endswith('.csv') %}
+                        <span class="badge bg-warning text-dark">CSV</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Other</span>
+                        {% endif %}
+                    </p>
+                    
+                    {% if filename.startswith('import_report') %}
+                    <p><strong>Report Type:</strong> <span class="badge bg-success">Import Report</span></p>
+                    {% elif filename.startswith('eviction_report') %}
+                    <p><strong>Report Type:</strong> <span class="badge bg-info">Eviction Report</span></p>
+                    {% else %}
+                    <p><strong>Report Type:</strong> <span class="badge bg-secondary">Other</span></p>
+                    {% endif %}
+                    
+                    {% if report.filepath %}
+                    <p><strong>Source File:</strong> {{ report.filepath }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if report.status_filter or report.date_from or report.date_to %}
+            <div class="mt-3">
+                <h6>Filters Applied:</h6>
+                <ul class="list-group list-group-flush">
+                    {% if report.status_filter %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Status Filter
+                        <span class="badge bg-primary rounded-pill">{{ report.status_filter }}</span>
+                    </li>
+                    {% endif %}
+                    
+                    {% if report.date_from %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Date From
+                        <span class="badge bg-primary rounded-pill">{{ report.date_from }}</span>
+                    </li>
+                    {% endif %}
+                    
+                    {% if report.date_to %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Date To
+                        <span class="badge bg-primary rounded-pill">{{ report.date_to }}</span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Import Report Content -->
+    {% if filename.startswith('import_report') %}
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="fas fa-file-import me-2"></i>Import Details</h5>
+        </div>
+        <div class="card-body">
+            <h4>Import Summary</h4>
+            <p>Successfully imported <strong>{{ report.records_imported }}</strong> records from <strong>{{ report.filepath | replace('\\', '/') | split('/') | last }}</strong>.</p>
+            
+            {% if report.column_mapping %}
+            <h5 class="mt-4">Column Mapping</h5>
+            <div class="table-responsive">
+                <table class="table table-striped table-sm">
+                    <thead>
+                        <tr>
+                            <th>Database Field</th>
+                            <th>CSV Column</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for field, column in report.column_mapping.items() %}
+                        <tr>
+                            <td>{{ field }}</td>
+                            <td>{{ column }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Eviction Report Content -->
+    {% if filename.startswith('eviction_report') and report.evictions %}
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Eviction Report</h5>
+        </div>
+        <div class="card-body">
+            <h4>Report Summary</h4>
+            <p>This report contains <strong>{{ report.count }}</strong> eviction records{% if report.status_filter %} with status <strong>{{ report.status_filter }}</strong>{% endif %}.</p>
+            
+            <h5 class="mt-4">Eviction Records</h5>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Case Number</th>
+                            <th>Tenant</th>
+                            <th>Property</th>
+                            <th>Filing Date</th>
+                            <th>Status</th>
+                            <th>Judgment Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for eviction in report.evictions %}
+                        <tr>
+                            <td>
+                                {% if eviction.id %}
+                                <a href="{{ url_for('view_eviction', eviction_id=eviction.id) }}">
+                                    {{ eviction.case_number }}
+                                </a>
+                                {% else %}
+                                {{ eviction.case_number }}
+                                {% endif %}
+                            </td>
+                            <td>{{ eviction.tenant_name }}</td>
+                            <td>{{ eviction.property_address }}</td>
+                            <td>{{ eviction.filing_date }}</td>
+                            <td>
+                                <span class="badge status-{{ eviction.status }}">{{ eviction.status }}</span>
+                            </td>
+                            <td>
+                                {% if eviction.judgment_amount %}
+                                ${{ eviction.judgment_amount }}
+                                {% else %}
+                                <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- JSON Content for Other Reports -->
+    {% if not filename.startswith('import_report') and not (filename.startswith('eviction_report') and report.evictions) %}
+    <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0"><i class="fas fa-code me-2"></i>Report Content</h5>
+        </div>
+        <div class="card-body">
+            <pre class="bg-light p-3 rounded"><code>{{ report | tojson(indent=2) }}</code></pre>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Actions -->
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Actions</h5>
+        </div>
+        <div class="card-body">
+            <div class="d-flex flex-wrap">
+                <a href="{{ url_for('reports') }}" class="btn btn-secondary me-2 mb-2">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Reports
+                </a>
+                <button type="button" class="btn btn-success me-2 mb-2">
+                    <i class="fas fa-sync me-2"></i>Regenerate Report
+                </button>
+                <button type="button" class="btn btn-info me-2 mb-2">
+                    <i class="fas fa-envelope me-2"></i>Email Report
+                </button>
+                <button type="button" class="btn btn-warning me-2 mb-2">
+                    <i class="fas fa-edit me-2"></i>Edit Report
+                </button>
+                <button type="button" class="btn btn-danger me-2 mb-2">
+                    <i class="fas fa-trash me-2"></i>Delete Report
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

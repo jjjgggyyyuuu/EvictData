@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "dns-lookup": "^0.1.0"
+  }
+}

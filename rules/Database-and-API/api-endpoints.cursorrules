@@ -1,0 +1,161 @@
+# API Endpoint Rules
+
+## RESTful Endpoints
+
+### Properties
+```
+GET /api/properties - List all properties
+GET /api/properties/{id} - Get property details
+POST /api/properties - Create new property
+PUT /api/properties/{id} - Update property
+DELETE /api/properties/{id} - Delete property (soft delete)
+```
+
+### Tenants
+```
+GET /api/tenants - List all tenants
+GET /api/tenants/{id} - Get tenant details
+POST /api/tenants - Create new tenant
+PUT /api/tenants/{id} - Update tenant
+DELETE /api/tenants/{id} - Delete tenant (soft delete)
+```
+
+### Eviction Cases
+```
+GET /api/cases - List all cases
+GET /api/cases/{id} - Get case details
+POST /api/cases - Create new case
+PUT /api/cases/{id} - Update case
+DELETE /api/cases/{id} - Delete case (soft delete)
+
+GET /api/cases/reports - Generate eviction reports
+GET /api/cases/statistics - Get eviction statistics
+```
+
+## Request/Response Format
+- Use consistent JSON structure
+- Include pagination for list endpoints
+- Implement proper error responses
+- Follow HTTP status codes
+
+## Authentication
+- Require API key/token
+- Implement rate limiting
+- Use HTTPS only
+- Log all API access
+
+## Validation
+- Validate all input data
+- Sanitize user input
+- Check permissions
+- Verify data integrity
+
+## Documentation
+- Use OpenAPI/Swagger
+- Include example requests
+- Document error codes
+- Provide SDK examples
+
+## Performance
+- Cache responses
+- Optimize queries
+- Compress responses
+- Monitor response times
+
+## Security
+- Implement CORS
+- Use API versioning
+- Validate content types
+- Prevent SQL injection
+
+## Error Handling
+```json
+{
+    "error": {
+        "code": "ERROR_CODE",
+        "message": "Human readable message",
+        "details": {
+            "field": "Additional error context"
+        }
+    }
+}
+```
+
+## Response Format
+```json
+{
+    "data": {
+        // Response data
+    },
+    "meta": {
+        "page": 1,
+        "per_page": 10,
+        "total": 100
+    }
+}
+```
+
+## Route Structure
+```python
+@app.route('/calculate', methods=['POST'])
+@login_required
+def calculate_timeline():
+    """Calculate eviction timeline based on provided dates"""
+    # Validate input
+    validate_request_data(request.form)
+    
+    # Process calculation
+    result = process_timeline_calculation(request.form)
+    
+    # Return response
+    return jsonify(result)
+```
+
+## Authentication
+- Require authentication for sensitive endpoints
+- Use proper session management
+- Implement rate limiting
+- Log authentication attempts
+
+## Input Validation
+- Validate all input parameters
+- Sanitize user input
+- Check date formats
+- Validate file uploads
+
+## Response Format
+```json
+{
+    "status": "success",
+    "data": {
+        "filing_date": "2025-04-08",
+        "estimated_judgment_date": "2025-05-08",
+        "days_remaining": 30
+    },
+    "message": "Timeline calculated successfully"
+}
+```
+
+## Error Handling
+- Use appropriate HTTP status codes
+- Provide detailed error messages
+- Handle all edge cases
+- Log errors properly
+
+## Security Guidelines
+- Use HTTPS for all endpoints
+- Implement CSRF protection
+- Validate content types
+- Sanitize file uploads
+
+## Rate Limiting
+- Implement per-user limits
+- Set appropriate timeouts
+- Monitor API usage
+- Handle rate limit errors
+
+## Documentation
+- Document all endpoints
+- Include request/response examples
+- List required parameters
+- Describe error responses 

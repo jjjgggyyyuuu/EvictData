@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - Eviction Timeline Calculator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 2rem;
+            color: #333;
+        }
+        .payment-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        h1 {
+            color: #0d6efd;
+            margin-bottom: 1.5rem;
+        }
+        .form-label {
+            font-weight: 600;
+        }
+        .alert {
+            margin-bottom: 1.5rem;
+        }
+        .pricing-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        .pricing-card:hover, .pricing-card.selected {
+            border-color: #0d6efd;
+            box-shadow: 0 0 15px rgba(13, 110, 253, 0.2);
+        }
+        .pricing-header {
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+        .price {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        .credit-card-form {
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="payment-container">
+                    <h1 class="text-center">Choose a Plan</h1>
+                    
+                    {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                    <div class="alert alert-info" role="alert">
+                        {% for message in messages %}
+                        {{ message }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                    
+                    <form method="POST" action="{{ url_for('payment') }}" id="payment-form">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="pricing-card" id="basic-plan">
+                                    <div class="pricing-header">
+                                        <h3>Basic Plan</h3>
+                                        <div class="price">$9.99</div>
+                                        <small class="text-muted">per month</small>
+                                    </div>
+                                    <div class="pricing-features">
+                                        <ul>
+                                            <li>Basic timeline calculations</li>
+                                            <li>PDF report generation</li>
+                                            <li>Email support</li>
+                                        </ul>
+                                    </div>
+                                    <div class="form-check mt-3">
+                                        <input class="form-check-input" type="radio" name="plan" id="plan-basic" value="basic" required>
+                                        <label class="form-check-label" for="plan-basic">
+                                            Select Basic Plan
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="pricing-card" id="premium-plan">
+                                    <div class="pricing-header">
+                                        <h3>Premium Plan</h3>
+                                        <div class="price">$19.99</div>
+                                        <small class="text-muted">per month</small>
+                                    </div>
+                                    <div class="pricing-features">
+                                        <ul>
+                                            <li>Advanced timeline calculations</li>
+                                            <li>Customizable PDF reports</li>
+                                            <li>Priority support</li>
+                                            <li>Document templates</li>
+                                            <li>Historical data access</li>
+                                        </ul>
+                                    </div>
+                                    <div class="form-check mt-3">
+                                        <input class="form-check-input" type="radio" name="plan" id="plan-premium" value="premium" required>
+                                        <label class="form-check-label" for="plan-premium">
+                                            Select Premium Plan
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="credit-card-form">
+                            <h3 class="mb-3">Payment Information</h3>
+                            
+                            <div class="mb-3">
+                                {{ form.card_name.label(class="form-label") }}
+                                {{ form.card_name(class="form-control", placeholder="Name on card") }}
+                                {% for error in form.card_name.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form.card_number.label(class="form-label") }}
+                                {{ form.card_number(class="form-control", placeholder="Card number") }}
+                                {% for error in form.card_number.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form.expiry_date.label(class="form-label") }}
+                                    {{ form.expiry_date(class="form-control", placeholder="MM/YY") }}
+                                    {% for error in form.expiry_date.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form.cvv.label(class="form-label") }}
+                                    {{ form.cvv(class="form-control", placeholder="CVV") }}
+                                    {% for error in form.cvv.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                {{ form.billing_address.label(class="form-label") }}
+                                {{ form.billing_address(class="form-control", placeholder="Enter your billing address") }}
+                                {% for error in form.billing_address.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                {{ form.submit(class="btn btn-primary btn-lg") }}
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <div class="mt-3 text-center">
+                        <p>Have questions about our plans? <a href="#">Contact support</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const basicPlan = document.getElementById('basic-plan');
+            const premiumPlan = document.getElementById('premium-plan');
+            const basicRadio = document.getElementById('plan-basic');
+            const premiumRadio = document.getElementById('plan-premium');
+            
+            basicPlan.addEventListener('click', function() {
+                basicRadio.checked = true;
+                basicPlan.classList.add('selected');
+                premiumPlan.classList.remove('selected');
+            });
+            
+            premiumPlan.addEventListener('click', function() {
+                premiumRadio.checked = true;
+                premiumPlan.classList.add('selected');
+                basicPlan.classList.remove('selected');
+            });
+            
+            // Add selected class on page load if a plan is already selected
+            if (basicRadio.checked) {
+                basicPlan.classList.add('selected');
+            } else if (premiumRadio.checked) {
+                premiumPlan.classList.add('selected');
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+
+{% block title %}Eviction Timeline Calculator{% endblock %}
+
+{% block styles %}
+<style>
+    .calculator-container {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .result-container {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        border-left: 5px solid #0d6efd;
+    }
+    .urgent {
+        border-left: 5px solid #dc3545;
+        background-color: #fff8f8;
+    }
+    .warning {
+        border-left: 5px solid #ffc107;
+        background-color: #fffbf0;
+    }
+    .safe {
+        border-left: 5px solid #198754;
+        background-color: #f0fff4;
+    }
+    .disclaimer {
+        background-color: #fff3cd;
+        border-left: 5px solid #ffc107;
+        padding: 1rem;
+        border-radius: 5px;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+    }
+    .timeline-info {
+        background-color: #e9ecef;
+        padding: 1rem;
+        border-radius: 5px;
+        margin-top: 1rem;
+    }
+    .days-remaining {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    .timeline-step {
+        position: relative;
+        padding-left: 30px;
+        margin-bottom: 15px;
+    }
+    .timeline-step:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: #0d6efd;
+    }
+    .timeline-step:after {
+        content: '';
+        position: absolute;
+        left: 9px;
+        top: 20px;
+        width: 2px;
+        height: calc(100% - 10px);
+        background-color: #0d6efd;
+    }
+    .timeline-step:last-child:after {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-4 mb-4">Eviction Timeline Calculator</h1>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Calculate Eviction Timeline</h5>
+                </div>
+                <div class="card-body">
+                    {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endif %}
+                    
+                    <p class="lead">Enter either a filing date or a writ date to calculate the eviction timeline.</p>
+                    
+                    <form action="{{ url_for('calculate') }}" method="post">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="filing_date" class="form-label">Filing Date</label>
+                                    <input type="date" class="form-control" id="filing_date" name="filing_date">
+                                    <div class="form-text">The date when the eviction case was filed</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="writ_date" class="form-label">Writ of Possession Date</label>
+                                    <input type="date" class="form-control" id="writ_date" name="writ_date">
+                                    <div class="form-text">The date when the writ of possession was issued</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary">Calculate Timeline</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Timeline Information</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-title">Average Timeline Periods</h6>
+                    <ul class="list-group mb-3">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Filing to Service
+                            <span class="badge bg-primary rounded-pill">{{ AVERAGE_TIMELINES.filing_to_service }} days</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Service to Court
+                            <span class="badge bg-primary rounded-pill">{{ AVERAGE_TIMELINES.service_to_court }} days</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Court to Judgment
+                            <span class="badge bg-primary rounded-pill">{{ AVERAGE_TIMELINES.court_to_judgment }} days</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Judgment to Writ
+                            <span class="badge bg-primary rounded-pill">{{ AVERAGE_TIMELINES.judgment_to_writ }} days</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Writ to Eviction
+                            <span class="badge bg-primary rounded-pill">{{ AVERAGE_TIMELINES.writ_to_eviction }} days</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="alert alert-warning">
+                        <strong>Disclaimer:</strong> These calculations are estimates based on average timelines. Actual eviction processes may vary based on jurisdiction, court schedules, and other factors.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Tips</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Enter only one date type (either filing or writ) for best results</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Use the timeline to plan your schedule and prepare accordingly</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Always consult with a legal professional for precise advice</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">The Eviction Process</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-2 text-center">
+                    <div class="border rounded-circle bg-light p-3 d-inline-block">
+                        <i class="fas fa-file-alt fa-2x text-primary"></i>
+                    </div>
+                    <h5 class="mt-2">Filing</h5>
+                    <small>Eviction case is filed with the court</small>
+                </div>
+                <div class="col-md-2 text-center">
+                    <div class="border rounded-circle bg-light p-3 d-inline-block">
+                        <i class="fas fa-envelope fa-2x text-primary"></i>
+                    </div>
+                    <h5 class="mt-2">Service</h5>
+                    <small>Tenant is served with notice</small>
+                </div>
+                <div class="col-md-2 text-center">
+                    <div class="border rounded-circle bg-light p-3 d-inline-block">
+                        <i class="fas fa-gavel fa-2x text-primary"></i>
+                    </div>
+                    <h5 class="mt-2">Court Date</h5>
+                    <small>Hearing before a judge</small>
+                </div>
+                <div class="col-md-2 text-center">
+                    <div class="border rounded-circle bg-light p-3 d-inline-block">
+                        <i class="fas fa-balance-scale fa-2x text-primary"></i>
+                    </div>
+                    <h5 class="mt-2">Judgment</h5>
+                    <small>Court issues judgment</small>
+                </div>
+                <div class="col-md-2 text-center">
+                    <div class="border rounded-circle bg-light p-3 d-inline-block">
+                        <i class="fas fa-file-contract fa-2x text-primary"></i>
+                    </div>
+                    <h5 class="mt-2">Writ</h5>
+                    <small>Writ of possession issued</small>
+                </div>
+                <div class="col-md-2 text-center">
+                    <div class="border rounded-circle bg-light p-3 d-inline-block">
+                        <i class="fas fa-door-open fa-2x text-primary"></i>
+                    </div>
+                    <h5 class="mt-2">Eviction</h5>
+                    <small>Physical eviction executed</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

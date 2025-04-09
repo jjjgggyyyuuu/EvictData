@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - Eviction Timeline Calculator{% endblock %}
+
+{% block additional_styles %}
+<style>
+    .checkout-container {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+    .subscription-details {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .price {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #0d6efd;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="checkout-container">
+                <h1 class="text-center mb-4">Complete Your Purchase</h1>
+                
+                <div class="subscription-details text-center">
+                    <h3>Eviction Timeline Calculator Access</h3>
+                    <div class="price">$9.99</div>
+                    <p class="text-muted mb-0">60-day full access</p>
+                    <ul class="list-unstyled mt-3 text-start">
+                        <li>✓ Accurate eviction timeline estimates</li>
+                        <li>✓ County-specific data</li>
+                        <li>✓ Export and share reports</li>
+                        <li>✓ Email notifications</li>
+                    </ul>
+                </div>
+                
+                <div id="payment-processing" class="text-center d-none">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Processing your payment...</p>
+                </div>
+                
+                <div id="payment-form-container">
+                    <p class="text-center mb-4">You'll be redirected to our secure payment processor to complete your purchase.</p>
+                    
+                    <div class="d-grid gap-2">
+                        <button id="checkout-button" class="btn btn-primary btn-lg">Proceed to Payment</button>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <img src="https://stripe.com/img/documentation/checkout/marketplace.png" alt="Powered by Stripe" height="30">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    // Initialize Stripe
+    const stripe = Stripe('{{ stripe_public_key }}');
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkoutButton = document.getElementById('checkout-button');
+        const paymentProcessing = document.getElementById('payment-processing');
+        const paymentFormContainer = document.getElementById('payment-form-container');
+        
+        checkoutButton.addEventListener('click', function() {
+            // Show processing spinner
+            paymentProcessing.classList.remove('d-none');
+            paymentFormContainer.classList.add('d-none');
+            
+            // Redirect to Stripe Checkout
+            stripe.redirectToCheckout({
+                sessionId: '{{ checkout_session_id }}'
+            }).then(function(result) {
+                if (result.error) {
+                    // Show error in the payment UI
+                    alert(result.error.message);
+                    paymentProcessing.classList.add('d-none');
+                    paymentFormContainer.classList.remove('d-none');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %} 

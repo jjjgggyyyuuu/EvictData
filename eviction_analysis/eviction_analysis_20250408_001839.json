@@ -1,0 +1,31 @@
+{
+  "source_file": "C:\\Users\\Jorda\\Downloads\\SearchExport_Cases_638796824390203787.csv",
+  "record_count": 1000,
+  "analysis_timestamp": "2025-04-08 00:18:39",
+  "timeline_analysis": {
+    "date_ranges": {
+      "case_filed_date": {
+        "min_date": "2025-03-24",
+        "max_date": "2025-04-07",
+        "count": 1000
+      }
+    },
+    "time_between_events": {}
+  },
+  "status_analysis": {
+    "Open (OPEN)": 516,
+    "Open (Open)": 46,
+    "Closed (MAGISTRATE CASE CLOSED)": 34,
+    "Open (Active)": 14,
+    "Open (Pending Disposition)": 8,
+    "Closed (Closed)": 3,
+    "Closed (Inactive)": 2,
+    "Open (PEN)": 1
+  },
+  "recent_activity": {
+    "most_recent_event": "case_filed_date",
+    "most_recent_date": "2025-04-07",
+    "number_of_cases": 59
+  },
+  "predictions": {}
+}

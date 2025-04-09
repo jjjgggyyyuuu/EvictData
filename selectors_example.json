@@ -1,0 +1,16 @@
+{
+  "record_container": "tr.case-record, div.case-item, .case-result, tbody tr",
+  "case_number": ".case-number, .case-id, td:nth-child(1), .caseNumber",
+  "filing_date": ".filing-date, .date-filed, td:nth-child(2), .filingDate",
+  "hearing_date": ".hearing-date, .court-date, td:nth-child(3), .hearingDate",
+  "status": ".status, .case-status, td:nth-child(4), .caseStatus",
+  "type": ".case-type, .type, td:nth-child(5), .caseType",
+  "address": ".address, .property-address, td:nth-child(6), .propertyAddress",
+  "plaintiff": ".plaintiff, .petitioner, td:nth-child(7), .plaintiffName",
+  "defendant": ".defendant, .respondent, td:nth-child(8), .defendantName",
+  "judgment_date": ".judgment-date, .disposition-date, .judgmentDate",
+  "judgment_amount": ".judgment-amount, .amount, .judgmentAmount",
+  "attorney": ".attorney, .attorney-name, .attorneyName",
+  "court": ".court, .court-name, .courtName",
+  "judge": ".judge, .judge-name, .judgeName"
+} 

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">Your Dashboard</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Subscription Status</h3>
+        </div>
+        <div class="card-body">
+            {% if subscription_active %}
+                <div class="alert alert-success">
+                    <p><strong>Active Subscription:</strong> {{ subscription_type|capitalize }}</p>
+                    <p><strong>Time Remaining:</strong> {{ days_remaining }} days</p>
+                </div>
+                <p>Enjoying your {{ subscription_type }} plan? You have full access to all features!</p>
+            {% else %}
+                <div class="alert alert-warning">
+                    <p><strong>No Active Subscription</strong></p>
+                </div>
+                <p>Upgrade your account to access premium features!</p>
+                <a href="{{ url_for('subscribe') }}" class="btn btn-primary">Subscribe Now</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Account Activity</h3>
+        </div>
+        <div class="card-body">
+            <p>Recent logins and activity will be displayed here.</p>
+            <!-- Activity data will be added in future updates -->
+        </div>
+    </div>
+</div>
+{% endblock %} 

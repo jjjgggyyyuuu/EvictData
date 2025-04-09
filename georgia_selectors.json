@@ -1,0 +1,18 @@
+{
+  "record_container": "tr.k-master-row, tr.gridRow, div.case-item, .search-results tr",
+  "case_number": "td:nth-child(1), .caseNumber, .case-number",
+  "filing_date": "td:nth-child(2), .filingDate, .filing-date",
+  "case_type": "td:nth-child(3), .caseType, .case-type",
+  "status": "td:nth-child(4), .status, .case-status",
+  "style": "td:nth-child(5), .style, .case-style",
+  "plaintiff": "td:nth-child(6), .plaintiff, .petitioner, .plaintiffName",
+  "defendant": "td:nth-child(7), .defendant, .respondent, .defendantName",
+  "court": "td:nth-child(8), .court, .location, .courtName",
+  "judge": "td:nth-child(9), .judge, .judgeName",
+  "last_event": "td:nth-child(10), .lastEvent, .last-event",
+  "last_event_date": "td:nth-child(11), .lastEventDate, .last-event-date",
+  "next_event": "td:nth-child(12), .nextEvent, .next-event",
+  "next_event_date": "td:nth-child(13), .nextEventDate, .next-event-date",
+  "decision_date": "td:nth-child(14), .decisionDate, .judgment-date",
+  "decision_text": "td:nth-child(15), .decision, .judgment-text"
+} 

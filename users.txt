@@ -1,0 +1,16 @@
+root
+admin
+user
+test
+guest
+administrator
+ubuntu
+kali
+postgres
+mysql
+oracle
+tomcat
+jenkins
+webmaster
+debian
+vagrant 

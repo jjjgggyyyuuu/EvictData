@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}Import CSV Data{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-4 mb-4">Import Eviction Data</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Select a CSV File</h5>
+        </div>
+        <div class="card-body">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <p class="lead">The system has found the following CSV files. Select one to import:</p>
+            
+            {% if csv_files %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Filename</th>
+                                <th>Size</th>
+                                <th>Last Modified</th>
+                                <th>Columns</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i, file in enumerate(csv_files) %}
+                            <tr>
+                                <td>{{ i+1 }}</td>
+                                <td>{{ file.filename }}</td>
+                                <td>{{ file.size_mb }} MB</td>
+                                <td>{{ file.modified }}</td>
+                                <td>{{ file.num_columns }}</td>
+                                <td>
+                                    <form action="{{ url_for('inspect_csv_route') }}" method="post">
+                                        <input type="hidden" name="filepath" value="{{ file.path }}">
+                                        <button type="submit" class="btn btn-primary btn-sm">Select</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-warning">
+                    <h5><i class="fas fa-exclamation-triangle me-2"></i>No CSV files found!</h5>
+                    <p>Place your CSV files in your Downloads folder or in the application's data directory.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Import Process</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card border-primary h-100">
+                        <div class="card-header bg-primary text-white">Step 1</div>
+                        <div class="card-body">
+                            <h5>Select CSV File</h5>
+                            <p>Choose a CSV file containing eviction data.</p>
+                        </div>
+                        <div class="card-footer bg-primary text-white">
+                            <i class="fas fa-check-circle"></i> You are here
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header">Step 2</div>
+                        <div class="card-body">
+                            <h5>Map Columns</h5>
+                            <p>Match CSV columns to database fields. The system will suggest mappings based on the data.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header">Step 3</div>
+                        <div class="card-body">
+                            <h5>Preview & Import</h5>
+                            <p>Review the data and complete the import process.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">CSV Format Information</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Recommended CSV Columns</h5>
+                    <p>For best results, your CSV file should contain the following information:</p>
+                    <ul>
+                        <li><strong>Case Number:</strong> Unique identifier for the eviction case</li>
+                        <li><strong>Tenant Name:</strong> Name of the tenant being evicted</li>
+                        <li><strong>Property Address:</strong> Address of the property involved</li>
+                        <li><strong>Filing Date:</strong> Date when the eviction was filed</li>
+                        <li><strong>Court Date:</strong> Scheduled court hearing date</li>
+                        <li><strong>Judgment Date:</strong> Date when judgment was rendered</li>
+                        <li><strong>Judgment Amount:</strong> Amount of the judgment</li>
+                        <li><strong>Writ Date:</strong> Date when writ of possession was issued</li>
+                        <li><strong>Status:</strong> Current status of the eviction</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h5>AI-Powered Column Mapping</h5>
+                    <p>Don't worry if your column names don't match exactly. Our system uses intelligent detection to:</p>
+                    <ul>
+                        <li>Automatically identify date columns</li>
+                        <li>Recognize monetary fields</li>
+                        <li>Detect eviction-related information</li>
+                        <li>Suggest the most appropriate mappings</li>
+                        <li>Allow you to adjust mappings if needed</li>
+                    </ul>
+                    <div class="alert alert-success">
+                        <strong>Pro Tip:</strong> The system works best with CSV files exported directly from court systems or property management software.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

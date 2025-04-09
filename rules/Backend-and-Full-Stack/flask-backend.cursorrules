@@ -1,0 +1,107 @@
+# Flask Backend Rules
+
+## Project Structure
+```
+backend/
+  ├── app/
+  │   ├── models/        # Database models
+  │   ├── routes/        # API routes
+  │   ├── services/      # Business logic
+  │   ├── utils/         # Helper functions
+  │   ├── schemas/       # Validation schemas
+  │   └── config/        # Configuration
+  ├── tests/             # Test files
+  ├── migrations/        # Database migrations
+  └── requirements.txt   # Dependencies
+```
+
+## Database Design
+- Use SQLAlchemy ORM
+- Implement proper relationships
+- Use migrations for schema changes
+- Follow naming conventions
+
+## API Design
+- Follow RESTful principles
+- Use proper HTTP methods
+- Implement versioning
+- Document with OpenAPI/Swagger
+
+## Authentication
+- Use JWT tokens
+- Implement role-based access
+- Secure password storage
+- Rate limit requests
+
+## Data Validation
+- Use Marshmallow schemas
+- Validate input data
+- Sanitize user input
+- Handle validation errors
+
+## Error Handling
+- Use custom error classes
+- Return proper status codes
+- Log errors appropriately
+- Provide clear messages
+
+## Security
+- Use HTTPS
+- Implement CORS
+- Prevent SQL injection
+- Secure sensitive data
+
+## Performance
+- Optimize database queries
+- Use proper indexing
+- Implement caching
+- Monitor response times
+
+## Testing
+- Write unit tests
+- Implement integration tests
+- Use pytest fixtures
+- Maintain test coverage
+
+## Logging
+- Use proper logging levels
+- Rotate log files
+- Track errors and warnings
+- Monitor API usage
+
+## Code Style
+- Follow PEP 8
+- Use type hints
+- Write clear docstrings
+- Maintain consistency
+
+## Features
+### Property Management
+- CRUD operations
+- Search and filtering
+- Bulk operations
+- File attachments
+
+### Tenant Management
+- CRUD operations
+- Payment tracking
+- Communication history
+- Document storage
+
+### Eviction Cases
+- Case creation
+- Status tracking
+- Document generation
+- Timeline calculation
+
+### Reports
+- Data aggregation
+- PDF generation
+- CSV exports
+- Custom filters
+
+### Analytics
+- Usage statistics
+- Performance metrics
+- Error tracking
+- User activity 

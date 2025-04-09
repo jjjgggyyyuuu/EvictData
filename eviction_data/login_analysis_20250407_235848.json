@@ -1,0 +1,37 @@
+{
+  "url": "https://georgia.tylertech.cloud/idp/account/signin?ReturnUrl=%2fidp%2fissue%2fwsfed%3fwtrealm%3dhttps%253a%252f%252fresearchga.tylerhost.net%252fauth%252fofs%26wctx%3dWsFedOwinState%253dK047hyEuvhoAkl200pfNCIHNp3bi9cxfqadap_J7HDTQCDGoDQOIHhBDzSWHAq-OV3cPjLlJnJNSQ8BzpmW5if9hK-dmlQG7ZWS-LrQc3P5zhVi-QXKpth-htZq5XxQOVU06Yj9eZSimiqsc79CZwzhhNdmaWSXqve-NZd_dwf7zED_X899PXEsXwdFO6JAUS78dNLYRU_JoySepG1aIZg%26wa%3dwsignin1.0&wtrealm=https%3a%2f%2fresearchga.tylerhost.net%2fauth%2fofs&wctx=WsFedOwinState%3dK047hyEuvhoAkl200pfNCIHNp3bi9cxfqadap_J7HDTQCDGoDQOIHhBDzSWHAq-OV3cPjLlJnJNSQ8BzpmW5if9hK-dmlQG7ZWS-LrQc3P5zhVi-QXKpth-htZq5XxQOVU06Yj9eZSimiqsc79CZwzhhNdmaWSXqve-NZd_dwf7zED_X899PXEsXwdFO6JAUS78dNLYRU_JoySepG1aIZg&wa=wsignin1.0",
+  "title": "Odyssey Identity Provider",
+  "forms": [
+    {
+      "form_index": 0,
+      "action": "/idp/account/signin?ReturnUrl=%2Fidp%2Fissue%2Fwsfed%3Fwtrealm%3Dhttps%253a%252f%252fresearchga.tylerhost.net%252fauth%252fofs%26wctx%3DWsFedOwinState%253dK047hyEuvhoAkl200pfNCIHNp3bi9cxfqadap_J7HDTQCDGoDQOIHhBDzSWHAq-OV3cPjLlJnJNSQ8BzpmW5if9hK-dmlQG7ZWS-LrQc3P5zhVi-QXKpth-htZq5XxQOVU06Yj9eZSimiqsc79CZwzhhNdmaWSXqve-NZd_dwf7zED_X899PXEsXwdFO6JAUS78dNLYRU_JoySepG1aIZg%26wa%3Dwsignin1.0&wtrealm=https%3A%2F%2Fresearchga.tylerhost.net%2Fauth%2Fofs&wctx=WsFedOwinState%3DK047hyEuvhoAkl200pfNCIHNp3bi9cxfqadap_J7HDTQCDGoDQOIHhBDzSWHAq-OV3cPjLlJnJNSQ8BzpmW5if9hK-dmlQG7ZWS-LrQc3P5zhVi-QXKpth-htZq5XxQOVU06Yj9eZSimiqsc79CZwzhhNdmaWSXqve-NZd_dwf7zED_X899PXEsXwdFO6JAUS78dNLYRU_JoySepG1aIZg&wa=wsignin1.0",
+      "method": "post",
+      "fields": {
+        "__RequestVerificationToken": {
+          "type": "hidden",
+          "value": "kvA_tmZtQgVrQGg-HxzgD6-LsztQ_QsjUzU4cT8dCdMO6VUbjLwkT550lZ_BDc8G4rpuDppPC-FJsbOzTRiGHi-bePhllIiIwY9IG9QHKgY1",
+          "required": false,
+          "placeholder": ""
+        },
+        "UserName": {
+          "type": "text",
+          "value": "",
+          "required": false,
+          "placeholder": "Email"
+        },
+        "Password": {
+          "type": "password",
+          "value": "",
+          "required": false,
+          "placeholder": "Password"
+        }
+      }
+    }
+  ],
+  "csrf_tokens": [
+    {
+      "name": "__RequestVerificationToken",
+      "value": "kvA_tmZtQgVrQGg-HxzgD6-LsztQ_QsjUzU4cT8dCdMO6VUbjLwkT550lZ_BDc8G4rpuDppPC-FJsbOzTRiGHi-bePhllIiIwY9IG9QHKgY1"
+    }
+  ]
+}

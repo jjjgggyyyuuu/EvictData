@@ -1,176 +1,362 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard - Eviction Management System{% endblock %}
+{% block title %}Time2Evict - The Complete Eviction Management Platform{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row mt-4">
-        <div class="col">
-            <h1 class="display-4">Dashboard</h1>
-            <p class="lead">Welcome to the Eviction Management System</p>
-        </div>
-    </div>
-
-    <!-- Statistics Cards -->
-    <div class="row mt-4">
-        <div class="col-md-3">
-            <div class="card bg-primary text-white mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">Active Evictions</h5>
-                    <h2>{{ active_evictions }}</h2>
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="{{ url_for('evictions') }}?status=active">View Details</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Simplify the Eviction Process</h1>
+                <p class="lead mb-4">From filing to possession, take the complexities out of the process with our industry-leading eviction management platform. Serving landlords, tenants, attorneys, and government agencies with powerful tools and transparent processes.</p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{{ url_for('contact') }}" class="btn btn-secondary btn-lg">Request a Demo</a>
+                    <a href="{{ url_for('pricing') }}" class="btn btn-outline-light btn-lg">Create an Account</a>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-dark mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">Pending Judgments</h5>
-                    <h2>{{ pending_judgments }}</h2>
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-dark stretched-link" href="{{ url_for('evictions') }}?status=judgment">View Details</a>
-                    <div class="small text-dark"><i class="fas fa-angle-right"></i></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">This Month</h5>
-                    <h2>{{ monthly_evictions }}</h2>
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="{{ url_for('evictions') }}">View Details</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-danger text-white mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">Timeline Calculator</h5>
-                    <p>Estimate eviction dates</p>
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="{{ url_for('timeline_calculator') }}">Calculate</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
+            <div class="col-lg-6 d-none d-lg-block">
+                <img src="{{ url_for('static', filename='images/dashboard-preview.png') }}" alt="Time2Evict Dashboard Preview" class="img-fluid rounded shadow-lg">
             </div>
         </div>
     </div>
+</section>
 
-    <div class="row">
-        <!-- Recent Evictions -->
-        <div class="col-lg-8">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-table me-1"></i>
-                    Recent Evictions
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Case #</th>
-                                    <th>Tenant</th>
-                                    <th>Filing Date</th>
-                                    <th>Status</th>
-                                    <th>Days Left</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% if recent_evictions %}
-                                    {% for eviction in recent_evictions %}
-                                    <tr>
-                                        <td>{{ eviction.case_number }}</td>
-                                        <td>{{ eviction.tenant_name }}</td>
-                                        <td>{{ eviction.filing_date }}</td>
-                                        <td>
-                                            <span class="badge 
-                                                {% if eviction.status == 'pending' %}bg-secondary{% 
-                                                elif eviction.status == 'active' %}bg-primary{% 
-                                                elif eviction.status == 'judgment' %}bg-warning{% 
-                                                elif eviction.status == 'writ' %}bg-danger{% 
-                                                elif eviction.status == 'completed' %}bg-success{% 
-                                                else %}bg-info{% endif %}">
-                                                {{ eviction.status }}
-                                            </span>
-                                        </td>
-                                        <td>{{ eviction.days_to_eviction }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                {% else %}
-                                    <tr>
-                                        <td colspan="5" class="text-center">No eviction cases found</td>
-                                    </tr>
-                                {% endif %}
-                            </tbody>
-                        </table>
+<!-- Features Section -->
+<section class="py-5 bg-light">
+    <div class="container py-4">
+        <h2 class="section-title">Time2Evict Features</h2>
+        
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <div class="feature-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h4>Timeline Calculator</h4>
+                        <p class="text-muted">Accurately predict critical dates in the eviction process based on filing dates and local regulations.</p>
                     </div>
-                    <div class="text-end mt-3">
-                        <a href="{{ url_for('evictions') }}" class="btn btn-primary btn-sm">View All Evictions</a>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <div class="feature-icon">
+                            <i class="fas fa-file-import"></i>
+                        </div>
+                        <h4>Bulk Import</h4>
+                        <p class="text-muted">Effortlessly import and manage multiple eviction cases at once with our intuitive CSV import tool.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h4>Advanced Reporting</h4>
+                        <p class="text-muted">Generate comprehensive reports for all stakeholders with customizable formats and detailed insights.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <div class="feature-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <h4>Notification System</h4>
+                        <p class="text-muted">Stay informed with automated notifications for important milestones in the eviction process.</p>
                     </div>
                 </div>
             </div>
         </div>
+        
+        <div class="text-center mt-5">
+            <a href="{{ url_for('pricing') }}" class="btn btn-accent">Discover More Features</a>
+        </div>
+    </div>
+</section>
 
-        <!-- Quick Links -->
-        <div class="col-lg-4">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-link me-1"></i>
-                    Quick Actions
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-3">
-                        <a href="{{ url_for('import_page') }}" class="btn btn-primary">
-                            <i class="fas fa-file-import me-2"></i>Import CSV Data
-                        </a>
-                        <a href="{{ url_for('timeline_calculator') }}" class="btn btn-success">
-                            <i class="fas fa-calculator me-2"></i>Timeline Calculator
-                        </a>
-                        <a href="{{ url_for('reports') }}" class="btn btn-info">
-                            <i class="fas fa-chart-bar me-2"></i>Generate Reports
-                        </a>
+<!-- User Groups Section -->
+<section class="py-5">
+    <div class="container py-4">
+        <h2 class="section-title">Solutions For Everyone</h2>
+        
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="card-title text-primary mb-3">For Landlords</h3>
+                        <ul class="list-unstyled">
+                            <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Track multiple properties and tenants</li>
+                            <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Automate document generation</li>
+                            <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Monitor eviction timelines</li>
+                            <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Reduce non-performing units</li>
+                            <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Bulk filing capabilities</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer bg-white border-0 text-center">
+                        <a href="{{ url_for('pricing') }}" class="btn btn-outline-primary">Landlord Solutions</a>
                     </div>
                 </div>
             </div>
-
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-info-circle me-1"></i>
-                    System Information
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="card-title text-primary mb-3">For Tenants</h3>
+                        <ul class="list-unstyled">
+                            <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Understand your rights</li>
+                            <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Access case information</li>
+                            <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Track important deadlines</li>
+                            <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Receive timely notifications</li>
+                            <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Document uploading</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer bg-white border-0 text-center">
+                        <a href="{{ url_for('pricing') }}" class="btn btn-outline-primary">Tenant Resources</a>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Version
-                            <span class="badge bg-primary rounded-pill">1.0.0</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Last Updated
-                            <span class="badge bg-secondary rounded-pill">{{ current_date }}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Data Source
-                            <span class="badge bg-info rounded-pill">Local JSON</span>
-                        </li>
-                    </ul>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="card-title text-primary mb-3">For Attorneys</h3>
+                        <ul class="list-unstyled">
+                            <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Case management tools</li>
+                            <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Document generation</li>
+                            <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Court date tracking</li>
+                            <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Client communication tools</li>
+                            <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Robust reporting</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer bg-white border-0 text-center">
+                        <a href="{{ url_for('pricing') }}" class="btn btn-outline-primary">Attorney Solutions</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="card-title text-primary mb-3">For Government Agencies</h3>
+                        <ul class="list-unstyled">
+                            <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Track regional eviction trends</li>
+                            <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Access statistical reporting</li>
+                            <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Monitor housing stability</li>
+                            <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Data-driven policy insights</li>
+                            <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Public service integration</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer bg-white border-0 text-center">
+                        <a href="{{ url_for('pricing') }}" class="btn btn-outline-primary">Government Solutions</a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
+
+<!-- Statistics Section -->
+<section class="py-5 bg-light">
+    <div class="container py-4">
+        <h2 class="section-title">Our Impact</h2>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="counter-box">
+                    <div class="counter-number">10,000+</div>
+                    <div class="counter-text">Active Eviction Cases</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="counter-box">
+                    <div class="counter-number">97%</div>
+                    <div class="counter-text">Accuracy of Filings</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="counter-box">
+                    <div class="counter-number">30%</div>
+                    <div class="counter-text">Faster Resolution Time</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-5">
+            <div class="col-lg-6 offset-lg-3">
+                <div class="card border-0 shadow">
+                    <div class="card-body p-4">
+                        <h4 class="mb-3 text-center">Recent Platform Activity</h4>
+                        
+                        <div class="list-group list-group-flush">
+                            {% if recent_evictions %}
+                                {% for eviction in recent_evictions %}
+                                <div class="list-group-item border-0 px-0">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">{{ eviction.case_number }}</h6>
+                                            <small class="text-muted">{{ eviction.tenant_name }} - {{ eviction.filing_date }}</small>
+                                        </div>
+                                        <span class="badge rounded-pill 
+                                            {% if eviction.status == 'pending' %}bg-secondary{% 
+                                            elif eviction.status == 'active' %}bg-primary{% 
+                                            elif eviction.status == 'judgment' %}bg-warning{% 
+                                            elif eviction.status == 'writ' %}bg-danger{% 
+                                            elif eviction.status == 'completed' %}bg-success{% 
+                                            else %}bg-info{% endif %}">
+                                            {{ eviction.status }}
+                                        </span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center py-3">
+                                    <p class="text-muted mb-0">No recent activity</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="text-center mt-3">
+                            <a href="{{ url_for('evictions') }}" class="btn btn-sm btn-outline-primary">View All Cases</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-5">
+    <div class="container py-4">
+        <h2 class="section-title">What Our Clients Say</h2>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="testimonial-card h-100">
+                    <p class="testimonial-text">"Time2Evict has transformed how we manage evictions. The timeline calculator alone has saved us weeks of guesswork and the reporting features provide invaluable insights for our property management team."</p>
+                    <div class="client-info">
+                        <img src="{{ url_for('static', filename='images/avatar-1.jpg') }}" class="client-avatar" alt="Client">
+                        <div>
+                            <h5 class="client-name">Sarah Johnson</h5>
+                            <p class="client-position">Property Manager, Horizon Properties</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="testimonial-card h-100">
+                    <p class="testimonial-text">"As an attorney, Time2Evict has become an indispensable tool in my practice. The document generation and case tracking features are incredibly thorough and have helped me better serve my clients."</p>
+                    <div class="client-info">
+                        <img src="{{ url_for('static', filename='images/avatar-2.jpg') }}" class="client-avatar" alt="Client">
+                        <div>
+                            <h5 class="client-name">Michael Rodriguez</h5>
+                            <p class="client-position">Real Estate Attorney</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="testimonial-card h-100">
+                    <p class="testimonial-text">"The platform made a stressful situation much more manageable. Being able to track my case status and receive notifications about important dates helped me understand exactly where I stood in the process."</p>
+                    <div class="client-info">
+                        <img src="{{ url_for('static', filename='images/avatar-3.jpg') }}" class="client-avatar" alt="Client">
+                        <div>
+                            <h5 class="client-name">Lisa Thompson</h5>
+                            <p class="client-position">Tenant</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5 bg-primary text-white">
+    <div class="container py-4 text-center">
+        <h2 class="mb-4">Ready to streamline your eviction management?</h2>
+        <p class="lead mb-4">Join thousands of professionals who trust Time2Evict to simplify the eviction process.</p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="{{ url_for('contact') }}" class="btn btn-secondary btn-lg">Request a Demo</a>
+            <a href="{{ url_for('pricing') }}" class="btn btn-outline-light btn-lg">Create an Account</a>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="py-5">
+    <div class="container py-4">
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                How do we get started?
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Getting started is easy. Just create an account, add your business information, and you're ready to go. Our onboarding process will guide you through setting up your profile and importing any existing cases.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                Is Time2Evict easy to use?
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Absolutely! Time2Evict is designed with user-friendliness in mind. Our intuitive interface makes it easy to navigate and manage your eviction cases, even if you're not tech-savvy.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                Can Time2Evict integrate with property management software?
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes, we offer integration with popular property management systems. Our CSV import tool also allows you to easily bring data from other systems into Time2Evict.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingFour">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                How much does it cost?
+                            </button>
+                        </h2>
+                        <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                We offer flexible pricing plans based on your needs. Visit our <a href="{{ url_for('pricing') }}">pricing page</a> for standard packages. We have options for individual landlords, property management companies, law firms, and government agencies.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5">
+            <p class="mb-3">Still have questions?</p>
+            <a href="{{ url_for('contact') }}" class="btn btn-outline-primary">Contact Us</a>
+        </div>
+    </div>
+</section>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    // Set current date for Last Updated field
+    // Set current date
     document.addEventListener('DOMContentLoaded', function() {
         const currentDate = new Date().toLocaleDateString();
         const dateElements = document.querySelectorAll('.current-date');

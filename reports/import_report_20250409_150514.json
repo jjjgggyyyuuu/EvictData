@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-04-09 15:05:14",
+  "filepath": "C:\\Users\\Jorda\\Downloads\\SearchExport_Cases_638797223707338702.csv",
+  "records_imported": 1000,
+  "column_mapping": {
+    "case_number": "Case Number",
+    "court_date": "Attorneys",
+    "filing_date": "Case Filed Date",
+    "judgment_amount": "Judge",
+    "judgment_date": "Case Filed Date",
+    "property_address": "Case Location",
+    "status": "Case Status",
+    "tenant_name": "Case Description"
+  }
+}

@@ -8,7 +8,7 @@
     
     <div class="card mb-4">
         <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Select a CSV File</h5>
+            <h5 class="mb-0">Upload CSV File</h5>
         </div>
         <div class="card-body">
             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -19,46 +19,23 @@
                 {% endif %}
             {% endwith %}
             
-            <p class="lead">The system has found the following CSV files. Select one to import:</p>
+            <p class="lead">Upload a CSV file containing eviction data to import into the system.</p>
             
-            {% if csv_files %}
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Filename</th>
-                                <th>Size</th>
-                                <th>Last Modified</th>
-                                <th>Columns</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for i, file in enumerate(csv_files) %}
-                            <tr>
-                                <td>{{ i+1 }}</td>
-                                <td>{{ file.filename }}</td>
-                                <td>{{ file.size_mb }} MB</td>
-                                <td>{{ file.modified }}</td>
-                                <td>{{ file.num_columns }}</td>
-                                <td>
-                                    <form action="{{ url_for('inspect_csv_route') }}" method="post">
-                                        <input type="hidden" name="filepath" value="{{ file.path }}">
-                                        <button type="submit" class="btn btn-primary btn-sm">Select</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            <form action="{{ url_for('upload_csv') }}" method="post" enctype="multipart/form-data" class="mb-4">
+                <div class="mb-3">
+                    <label for="csvFile" class="form-label">Select CSV File</label>
+                    <input class="form-control" type="file" id="csvFile" name="csvFile" accept=".csv">
+                    <div class="form-text">Maximum file size: 10MB</div>
                 </div>
-            {% else %}
-                <div class="alert alert-warning">
-                    <h5><i class="fas fa-exclamation-triangle me-2"></i>No CSV files found!</h5>
-                    <p>Place your CSV files in your Downloads folder or in the application's data directory.</p>
-                </div>
-            {% endif %}
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-upload me-2"></i>Upload and Continue
+                </button>
+            </form>
+            
+            <div class="alert alert-info">
+                <h5><i class="fas fa-info-circle me-2"></i>File Format Information</h5>
+                <p>Your CSV file should contain eviction-related data. The system will help you map the columns to the appropriate fields in the next step.</p>
+            </div>
         </div>
     </div>
     
@@ -72,8 +49,8 @@
                     <div class="card border-primary h-100">
                         <div class="card-header bg-primary text-white">Step 1</div>
                         <div class="card-body">
-                            <h5>Select CSV File</h5>
-                            <p>Choose a CSV file containing eviction data.</p>
+                            <h5>Upload CSV File</h5>
+                            <p>Upload a CSV file containing eviction data from your computer.</p>
                         </div>
                         <div class="card-footer bg-primary text-white">
                             <i class="fas fa-check-circle"></i> You are here

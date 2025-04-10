@@ -5,16 +5,20 @@ import json
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.urls import url_parse
 import stripe
+from dotenv import load_dotenv
 
 from models import db, User, Subscription, PaymentHistory
 from forms import LoginForm, RegistrationForm
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'dev-key-for-testing-only'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or 'sqlite:///eviction_calculator.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['STRIPE_SECRET_KEY'] = os.environ.get('STRIPE_SECRET_KEY') or 'sk_test_your_stripe_key'
-app.config['STRIPE_PUBLIC_KEY'] = os.environ.get('STRIPE_PUBLIC_KEY') or 'pk_test_your_stripe_key'
+app.config['STRIPE_SECRET_KEY'] = os.environ.get('STRIPE_SECRET_KEY')
+app.config['STRIPE_PUBLIC_KEY'] = os.environ.get('STRIPE_PUBLIC_KEY')
 
 # Initialize Stripe directly
 stripe.api_key = app.config['STRIPE_SECRET_KEY']

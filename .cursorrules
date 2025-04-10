@@ -1,6 +1,61 @@
-Cursor Rules
+// Eviction Management System - Cursor Rules
 
-This repository contains a collection of .cursorrules files for use with Cursor AI.
+// Project Structure
+- Flask application for eviction management
+- CSV import functionality for eviction data
+- Eviction timeline calculator
+- Reporting system
+- Payment processing with Stripe
+- User authentication
+
+// Important Files
+- app.py: Main application file with routes and configuration
+- simplified_app.py: Simplified version with core functionality
+- eviction_timeline_calculator.py: Timeline calculation logic
+- csv_import_tools.py: CSV import utilities
+
+// Database Structure
+- User data (landlords, tenants, administrators)
+- Property records
+- Eviction cases
+- Reports
+- Payment history
+
+// Note: Sensitive Information
+- Stripe API keys are stored in environment variables
+- No actual sensitive user data should be committed to the repository
+- Use .env files for local development
+
+// Coding Conventions
+- Flask routes are organized by functionality
+- Templates extend from base.html
+- Bootstrap is used for styling
+- RESTful API conventions for endpoints
+
+// Common Libraries
+- Flask for web framework
+- Pandas for data manipulation
+- Stripe for payment processing
+- SQLAlchemy for database ORM
+- Jinja2 for templating
+
+// Security Considerations
+- Never commit API keys or secrets
+- Use environment variables for sensitive information
+- Sanitize user inputs
+- Implement proper authentication and authorization
+
+// Development Workflow
+- Use virtual environment for dependencies
+- Run with Flask development server during development
+- Database migrations handled with Flask-Migrate
+- Test payments with Stripe test mode
+
+// Deployment
+- Configure production settings before deployment
+- Use proper web server (Gunicorn, uWSGI) in production
+- Set DEBUG=False in production
+- Use secure HTTPS connections
 
 # Project Structure
 - The 'rules' directory contains categorized .cursorrules examples

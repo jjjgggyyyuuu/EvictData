@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment Successful - Time2Evict{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow">
+                <div class="card-body p-5 text-center">
+                    <div class="mb-4">
+                        <span class="display-1 text-success">
+                            <i class="fas fa-check-circle"></i>
+                        </span>
+                    </div>
+                    <h1 class="mb-4">Payment Successful!</h1>
+                    <p class="lead mb-4">Thank you for subscribing to Time2Evict. Your payment has been processed successfully.</p>
+                    
+                    <div class="alert alert-success mb-4">
+                        <p class="mb-0">A confirmation email has been sent to your email address with your receipt and subscription details.</p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Your Subscription Details</h5>
+                        <p><strong>Plan:</strong> {{ plan|default('Your selected plan') }}</p>
+                        <p><strong>Start Date:</strong> {{ start_date|default('Today') }}</p>
+                        <p><strong>Billing Cycle:</strong> Monthly</p>
+                    </div>
+                    
+                    <div class="d-grid gap-3">
+                        <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">Go to Dashboard</a>
+                        <a href="{{ url_for('contact') }}" class="btn btn-outline-secondary">Need Help?</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <p class="text-muted">
+                    <small>If you have any questions about your subscription, please contact our support team at <a href="mailto:support@time2evict.com">support@time2evict.com</a></small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

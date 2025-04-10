@@ -5,15 +5,36 @@ import os
 import json
 import pandas as pd
 from csv_import_tools import locate_csv_files, inspect_csv, suggest_column_mapping, preview_import, prepare_import_config
+from werkzeug.utils import secure_filename
+import stripe
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Create necessary directories
 os.makedirs('templates', exist_ok=True)
 os.makedirs('reports', exist_ok=True)
 os.makedirs('eviction_data', exist_ok=True)
+os.makedirs('uploads', exist_ok=True)
 
 # Initialize Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'dev-key-for-development'
+app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB max file size
+
+# Stripe configuration
+app.config['STRIPE_PUBLIC_KEY'] = os.environ.get('STRIPE_PUBLIC_KEY')
+app.config['STRIPE_SECRET_KEY'] = os.environ.get('STRIPE_SECRET_KEY')
+stripe.api_key = app.config['STRIPE_SECRET_KEY']
+
+# Stripe product prices
+PRICE_IDS = {
+    'basic': 'price_1QzGF9FM2CXXOJ1f1234abcd',
+    'pro': 'price_1QzGG0FM2CXXOJ1f5678efgh',
+    'enterprise': 'price_1QzGGaFM2CXXOJ1f9012ijkl'
+}
 
 # Make enumerate available in templates
 app.jinja_env.globals.update(enumerate=enumerate)
@@ -30,11 +51,11 @@ app.jinja_env.globals.update(round=round)
 
 # Define average timelines for eviction process (in days)
 AVERAGE_TIMELINES = {
-    'filing_to_service': 5,
-    'service_to_court': 14,
-    'court_to_judgment': 2,
-    'judgment_to_writ': 7,
-    'writ_to_eviction': 7
+    'filing_to_service': 7,    # 7 days from filing to service
+    'service_to_court': 14,    # 14 days from service to court date
+    'court_to_judgment': 3,    # 3 days from court to judgment
+    'judgment_to_writ': 7,     # 7 days from judgment to writ
+    'writ_to_eviction': 7      # 7 days from writ to actual eviction
 }
 
 # Database of evictions (for demo purposes)
@@ -70,7 +91,7 @@ def index():
     # Load some demo data for the dashboard
     load_evictions()
     active_evictions = len([e for e in EVICTIONS_DB if e.get('status') == 'active'])
-    monthly_evictions = len([e for e in EVICTIONS_DB if e.get('filing_date', '').startswith(datetime.now().strftime('%Y-%m'))])
+    monthly_evictions = len([e for e in EVICTIONS_DB if e.get('filing_date') and str(e.get('filing_date', '')).startswith(datetime.now().strftime('%Y-%m'))])
     pending_judgments = len([e for e in EVICTIONS_DB if e.get('status') == 'judgment'])
     
     recent_evictions = EVICTIONS_DB[:5] if EVICTIONS_DB else []
@@ -80,6 +101,64 @@ def index():
                           monthly_evictions=monthly_evictions,
                           pending_judgments=pending_judgments,
                           recent_evictions=recent_evictions)
+
+# Pricing routes
+@app.route('/pricing')
+def pricing():
+    return render_template('pricing.html')
+
+@app.route('/create-checkout-session', methods=['POST'])
+def create_checkout_session():
+    price_id = request.form.get('price_id')
+    plan = request.form.get('plan')
+    
+    if not price_id or price_id not in PRICE_IDS:
+        flash('Invalid plan selected', 'error')
+        return redirect(url_for('pricing'))
+    
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price': PRICE_IDS[price_id],
+                'quantity': 1,
+            }],
+            mode='subscription',
+            success_url=url_for('payment_success', plan=plan, _external=True),
+            cancel_url=url_for('payment_cancel', _external=True),
+        )
+        return redirect(checkout_session.url, code=303)
+    except Exception as e:
+        flash(f'An error occurred: {str(e)}', 'error')
+        return redirect(url_for('pricing'))
+
+@app.route('/payment/success')
+def payment_success():
+    plan = request.args.get('plan', 'Your selected plan')
+    start_date = datetime.now().strftime('%Y-%m-%d')
+    return render_template('payment_success.html', plan=plan, start_date=start_date)
+
+@app.route('/payment/cancel')
+def payment_cancel():
+    return render_template('payment_cancel.html')
+
+# Contact routes
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
+
+@app.route('/contact/submit', methods=['POST'])
+def contact_submit():
+    name = request.form.get('name')
+    email = request.form.get('email')
+    subject = request.form.get('subject')
+    message = request.form.get('message')
+    
+    # Here you would typically send an email or store the contact form submission
+    # For demo purposes, we'll just flash a success message
+    
+    flash(f'Thank you, {name}! Your message has been received. We\'ll contact you shortly at {email}.', 'success')
+    return redirect(url_for('contact'))
 
 @app.route('/timeline_calculator')
 def timeline_calculator():
@@ -158,25 +237,49 @@ def calculate():
 # CSV Import Routes
 @app.route('/import')
 def import_page():
-    csv_files = locate_csv_files()
-    return render_template('import.html', csv_files=csv_files)
+    return render_template('import.html')
 
-@app.route('/inspect_csv', methods=['POST'])
-def inspect_csv_route():
-    filepath = request.form.get('filepath')
-    if not filepath:
+@app.route('/upload_csv', methods=['POST'])
+def upload_csv():
+    if 'csvFile' not in request.files:
+        flash('No file part', 'error')
+        return redirect(url_for('import_page'))
+    
+    csv_file = request.files['csvFile']
+    
+    if csv_file.filename == '':
         flash('No file selected', 'error')
         return redirect(url_for('import_page'))
     
-    csv_info = inspect_csv(filepath)
-    column_mapping = suggest_column_mapping(csv_info)
-    session['filepath'] = filepath
-    session['column_mapping'] = column_mapping
+    if not csv_file.filename.endswith('.csv'):
+        flash('File must be a CSV file', 'error')
+        return redirect(url_for('import_page'))
     
-    return render_template('mapping.html', 
-                          csv_info=csv_info, 
-                          column_mapping=column_mapping,
-                          filepath=filepath)
+    # Create uploads directory if it doesn't exist
+    os.makedirs('uploads', exist_ok=True)
+    
+    # Save the file
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f"uploaded_{timestamp}_{secure_filename(csv_file.filename)}"
+    filepath = os.path.join('uploads', filename)
+    csv_file.save(filepath)
+    
+    # Inspect the uploaded file
+    try:
+        csv_info = inspect_csv(filepath)
+        column_mapping = suggest_column_mapping(csv_info)
+        
+        # Store filepath and column mapping in session
+        session['filepath'] = filepath
+        session['column_mapping'] = column_mapping
+        
+        return render_template('mapping.html', 
+                             csv_info=csv_info, 
+                             column_mapping=column_mapping,
+                             filepath=filepath)
+    except Exception as e:
+        flash(f'Error processing file: {str(e)}', 'error')
+        return redirect(url_for('import_page'))
 
 @app.route('/preview_import', methods=['POST'])
 def preview_import_route():
@@ -368,11 +471,11 @@ def generate_eviction_report():
     
     if date_from:
         date_from = datetime.strptime(date_from, '%Y-%m-%d')
-        filtered_evictions = [e for e in filtered_evictions if datetime.strptime(e.get('filing_date', '1900-01-01'), '%Y-%m-%d') >= date_from]
+        filtered_evictions = [e for e in filtered_evictions if e.get('filing_date') and datetime.strptime(str(e.get('filing_date', '1900-01-01')), '%Y-%m-%d') >= date_from]
     
     if date_to:
         date_to = datetime.strptime(date_to, '%Y-%m-%d')
-        filtered_evictions = [e for e in filtered_evictions if datetime.strptime(e.get('filing_date', '2100-12-31'), '%Y-%m-%d') <= date_to]
+        filtered_evictions = [e for e in filtered_evictions if e.get('filing_date') and datetime.strptime(str(e.get('filing_date', '2100-12-31')), '%Y-%m-%d') <= date_to]
     
     # Generate report
     os.makedirs('reports', exist_ok=True)

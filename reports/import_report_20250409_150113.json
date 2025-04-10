@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-04-09 15:01:13",
+  "filepath": "C:\\Users\\Jorda\\Downloads\\SearchExport_Documents_638797233859394166.csv",
+  "records_imported": 1000,
+  "column_mapping": {
+    "case_number": "Case Number",
+    "filing_date": "File Date",
+    "status": "Case Description",
+    "tenant_name": "Document Name"
+  }
+}
